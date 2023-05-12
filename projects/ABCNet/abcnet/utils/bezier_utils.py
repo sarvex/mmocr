@@ -31,8 +31,7 @@ def curve2bezier(curve: ArrayLike):
     norm_distance = np.hstack(([0], norm_distance))
     cum_norm_dis = norm_distance.cumsum()
     pseudo_inv = np.linalg.pinv(bezier_coefficients(3, 4, cum_norm_dis))
-    control_points = pseudo_inv.dot(curve)
-    return control_points
+    return pseudo_inv.dot(curve)
 
 
 def bezier2curve(bezier: np.ndarray, num_sample: int = 10):

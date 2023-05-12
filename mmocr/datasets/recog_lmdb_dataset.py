@@ -124,11 +124,8 @@ class RecogLMDBDataset(BaseDataset):
         Returns:
             (dict): Parsed annotation.
         """
-        data_info = {}
         img_key, text = raw_anno_info
-        data_info['img_key'] = img_key
-        data_info['instances'] = [dict(text=text)]
-        return data_info
+        return {'img_key': img_key, 'instances': [dict(text=text)]}
 
     def prepare_data(self, idx) -> Any:
         """Get data processed by ``self.pipeline``.

@@ -236,10 +236,14 @@ class BaseMMOCRInferencer(BaseInferencer):
 
         If the transform is not found, returns -1.
         """
-        for i, transform in enumerate(pipeline_cfg):
-            if transform['type'] == name:
-                return i
-        return -1
+        return next(
+            (
+                i
+                for i, transform in enumerate(pipeline_cfg)
+                if transform['type'] == name
+            ),
+            -1,
+        )
 
     def visualize(self,
                   inputs: InputsType,
@@ -358,7 +362,6 @@ class BaseMMOCRInferencer(BaseInferencer):
                 json-serializable dict containing only basic data elements such
                 as strings and numbers.
         """
-        result_dict = {}
         results = preds
         if not return_datasample:
             results = []
@@ -370,8 +373,7 @@ class BaseMMOCRInferencer(BaseInferencer):
                     pred_out_file = osp.join(pred_out_dir, pred_name)
                     mmengine.dump(result, pred_out_file)
                 results.append(result)
-        # Add img to the results after printing and dumping
-        result_dict['predictions'] = results
+        result_dict = {'predictions': results}
         if print_result:
             print(result_dict)
         result_dict['visualization'] = visualization

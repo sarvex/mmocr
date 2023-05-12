@@ -50,7 +50,7 @@ class BaseTextRecogPostprocessor:
         }
         if not mmengine.is_list_of(ignore_chars, str):
             raise TypeError('ignore_chars must be list of str')
-        ignore_indexes = list()
+        ignore_indexes = []
         for ignore_char in ignore_chars:
             index = mapping_table.get(
                 ignore_char,

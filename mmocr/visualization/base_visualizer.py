@@ -251,11 +251,5 @@ class BaseLocalVisualizer(Visualizer):
         Returns:
             np.ndarray: The concatenated image.
         """
-        cat_image = list()
-        for img in imgs:
-            if img is not None:
-                cat_image.append(img)
-        if len(cat_image):
-            return np.concatenate(cat_image, axis=axis)
-        else:
-            return None
+        cat_image = [img for img in imgs if img is not None]
+        return np.concatenate(cat_image, axis=axis) if len(cat_image) else None

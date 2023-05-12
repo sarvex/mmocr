@@ -67,9 +67,7 @@ class BoundedScaleAspectJitter(BaseTransform):
         self.aspect_ratio_range = aspect_ratio_range
         self.long_size_bound = long_size_bound
         self.short_size_bound = short_size_bound
-        self.resize_cfg = dict(type=resize_type, **resize_kwargs)
-        # create an empty Reisize object
-        self.resize_cfg.update(dict(scale=0))
+        self.resize_cfg = dict(type=resize_type, **resize_kwargs) | {'scale': 0}
         self.resize = TRANSFORMS.build(self.resize_cfg)
 
     def _sample_from_range(self, range: Tuple[float, float]) -> float:
@@ -83,8 +81,7 @@ class BoundedScaleAspectJitter(BaseTransform):
             float: A ratio randomly sampled from the range.
         """
         min_value, max_value = min(range), max(range)
-        value = np.random.random_sample() * (max_value - min_value) + min_value
-        return value
+        return np.random.random_sample() * (max_value - min_value) + min_value
 
     def transform(self, results: Dict) -> Dict:
         h, w = results['img'].shape[:2]
@@ -175,20 +172,20 @@ class RandomFlip(MMCV_RandomFlip):
 
         h, w = img_shape
         flipped_polygons = []
-        if direction == 'horizontal':
+        if direction == 'diagonal':
             for polygon in polygons:
                 flipped_polygon = polygon.copy()
-                flipped_polygon[0::2] = w - polygon[0::2]
+                flipped_polygon[::2] = w - polygon[::2]
+                flipped_polygon[1::2] = h - polygon[1::2]
+                flipped_polygons.append(flipped_polygon)
+        elif direction == 'horizontal':
+            for polygon in polygons:
+                flipped_polygon = polygon.copy()
+                flipped_polygon[::2] = w - polygon[::2]
                 flipped_polygons.append(flipped_polygon)
         elif direction == 'vertical':
             for polygon in polygons:
                 flipped_polygon = polygon.copy()
-                flipped_polygon[1::2] = h - polygon[1::2]
-                flipped_polygons.append(flipped_polygon)
-        elif direction == 'diagonal':
-            for polygon in polygons:
-                flipped_polygon = polygon.copy()
-                flipped_polygon[0::2] = w - polygon[0::2]
                 flipped_polygon[1::2] = h - polygon[1::2]
                 flipped_polygons.append(flipped_polygon)
         else:
@@ -345,10 +342,7 @@ class ShortScaleAspectJitter(BaseTransform):
         self.short_size = short_size
         self.ratio_range = ratio_range
         self.aspect_ratio_range = aspect_ratio_range
-        self.resize_cfg = dict(type=resize_type, **resize_kwargs)
-
-        # create a empty Reisize object
-        self.resize_cfg.update(dict(scale=0))
+        self.resize_cfg = dict(type=resize_type, **resize_kwargs) | {'scale': 0}
         self.resize = TRANSFORMS.build(self.resize_cfg)
         self.scale_divisor = scale_divisor
 
@@ -363,8 +357,7 @@ class ShortScaleAspectJitter(BaseTransform):
             float: A ratio randomly sampled from the range.
         """
         min_value, max_value = min(range), max(range)
-        value = np.random.random_sample() * (max_value - min_value) + min_value
-        return value
+        return np.random.random_sample() * (max_value - min_value) + min_value
 
     def transform(self, results: Dict) -> Dict:
         """Short Scale Aspect Jitter.
@@ -730,8 +723,8 @@ class TextDetRandomCrop(BaseTransform):
         t_w, t_h = self.target_size
 
         # target size is bigger than origin size
-        t_h = t_h if t_h < h else h
-        t_w = t_w if t_w < w else w
+        t_h = min(t_h, h)
+        t_w = min(t_w, w)
         if (gt_polygons is not None and len(gt_polygons) > 0
                 and self._get_postive_prob() < self.positive_sample_ratio):
 

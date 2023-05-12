@@ -63,8 +63,7 @@ class RecRoIHead(BaseRoIHead):
         bbox_feats = self.roi_extractor(inputs, pred_instances)
         if bbox_feats.size(0) == 0:
             return []
-        len_instance = sum(
-            [len(instance_data) for instance_data in pred_instances])
+        len_instance = sum(len(instance_data) for instance_data in pred_instances)
         rec_data_samples = [TextRecogDataSample() for _ in range(len_instance)]
         rec_data_samples = self.rec_head.predict(bbox_feats, rec_data_samples)
         return rec_data_samples

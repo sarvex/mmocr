@@ -298,8 +298,7 @@ class RandomRotate(BaseTransform):
         Returns:
             float: The random angle used for rotation
         """
-        angle = np.random.random_sample() * 2 * max_angle - max_angle
-        return angle
+        return np.random.random_sample() * 2 * max_angle - max_angle
 
     @staticmethod
     def _cal_canvas_size(ori_size: Tuple[int, int],
@@ -322,8 +321,7 @@ class RandomRotate(BaseTransform):
         canvas_h = int(w * math.fabs(sin) + h * math.fabs(cos))
         canvas_w = int(w * math.fabs(cos) + h * math.fabs(sin))
 
-        canvas_size = (canvas_h, canvas_w)
-        return canvas_size
+        return canvas_h, canvas_w
 
     @staticmethod
     def _rotate_points(center: Tuple[float, float],
@@ -369,46 +367,45 @@ class RandomRotate(BaseTransform):
         Returns:
             Tuple[int, int]: The shifting offset of the center point.
         """
-        if results.get('img', None) is not None:
-            h = results['img'].shape[0]
-            w = results['img'].shape[1]
-            rotation_matrix = cv2.getRotationMatrix2D(
-                (w / 2, h / 2), results['rotated_angle'], 1)
-
-            canvas_size = self._cal_canvas_size((h, w),
-                                                results['rotated_angle'])
-            center_shift = (int(
-                (canvas_size[1] - w) / 2), int((canvas_size[0] - h) / 2))
-            rotation_matrix[0, 2] += int((canvas_size[1] - w) / 2)
-            rotation_matrix[1, 2] += int((canvas_size[0] - h) / 2)
-            if self.pad_with_fixed_color:
-                rotated_img = cv2.warpAffine(
-                    results['img'],
-                    rotation_matrix, (canvas_size[1], canvas_size[0]),
-                    flags=cv2.INTER_NEAREST,
-                    borderValue=self.pad_value)
-            else:
-                mask = np.zeros_like(results['img'])
-                (h_ind, w_ind) = (np.random.randint(0, h * 7 // 8),
-                                  np.random.randint(0, w * 7 // 8))
-                img_cut = results['img'][h_ind:(h_ind + h // 9),
-                                         w_ind:(w_ind + w // 9)]
-                img_cut = mmcv.imresize(img_cut,
-                                        (canvas_size[1], canvas_size[0]))
-                mask = cv2.warpAffine(
-                    mask,
-                    rotation_matrix, (canvas_size[1], canvas_size[0]),
-                    borderValue=[1, 1, 1])
-                rotated_img = cv2.warpAffine(
-                    results['img'],
-                    rotation_matrix, (canvas_size[1], canvas_size[0]),
-                    borderValue=[0, 0, 0])
-                rotated_img = rotated_img + img_cut * mask
-
-            results['img'] = rotated_img
-        else:
+        if results.get('img', None) is None:
             raise ValueError('`img` is not found in results')
 
+        h = results['img'].shape[0]
+        w = results['img'].shape[1]
+        rotation_matrix = cv2.getRotationMatrix2D(
+            (w / 2, h / 2), results['rotated_angle'], 1)
+
+        canvas_size = self._cal_canvas_size((h, w),
+                                            results['rotated_angle'])
+        center_shift = (int(
+            (canvas_size[1] - w) / 2), int((canvas_size[0] - h) / 2))
+        rotation_matrix[0, 2] += int((canvas_size[1] - w) / 2)
+        rotation_matrix[1, 2] += int((canvas_size[0] - h) / 2)
+        if self.pad_with_fixed_color:
+            rotated_img = cv2.warpAffine(
+                results['img'],
+                rotation_matrix, (canvas_size[1], canvas_size[0]),
+                flags=cv2.INTER_NEAREST,
+                borderValue=self.pad_value)
+        else:
+            mask = np.zeros_like(results['img'])
+            (h_ind, w_ind) = (np.random.randint(0, h * 7 // 8),
+                              np.random.randint(0, w * 7 // 8))
+            img_cut = results['img'][h_ind:(h_ind + h // 9),
+                                     w_ind:(w_ind + w // 9)]
+            img_cut = mmcv.imresize(img_cut,
+                                    (canvas_size[1], canvas_size[0]))
+            mask = cv2.warpAffine(
+                mask,
+                rotation_matrix, (canvas_size[1], canvas_size[0]),
+                borderValue=[1, 1, 1])
+            rotated_img = cv2.warpAffine(
+                results['img'],
+                rotation_matrix, (canvas_size[1], canvas_size[0]),
+                borderValue=[0, 0, 0])
+            rotated_img = rotated_img + img_cut * mask
+
+        results['img'] = rotated_img
         return center_shift
 
     def _rotate_bboxes(self, results: Dict, center_shift: Tuple[int,
@@ -574,22 +571,23 @@ class Resize(MMCV_Resize):
 
     def _resize_polygons(self, results: dict) -> None:
         """Resize polygons with ``results['scale_factor']``."""
-        if results.get('gt_polygons', None) is not None:
-            polygons = results['gt_polygons']
-            polygons_resize = []
-            for idx, polygon in enumerate(polygons):
-                polygon = rescale_polygon(polygon, results['scale_factor'])
-                if self.clip_object_border:
-                    crop_bbox = np.array([
-                        0, 0, results['img_shape'][1], results['img_shape'][0]
-                    ])
-                    polygon = crop_polygon(polygon, crop_bbox)
-                if polygon is not None:
-                    polygons_resize.append(polygon.astype(np.float32))
-                else:
-                    polygons_resize.append(
-                        np.zeros_like(polygons[idx], dtype=np.float32))
-            results['gt_polygons'] = polygons_resize
+        if results.get('gt_polygons', None) is None:
+            return
+        polygons = results['gt_polygons']
+        polygons_resize = []
+        for idx, polygon in enumerate(polygons):
+            polygon = rescale_polygon(polygon, results['scale_factor'])
+            if self.clip_object_border:
+                crop_bbox = np.array([
+                    0, 0, results['img_shape'][1], results['img_shape'][0]
+                ])
+                polygon = crop_polygon(polygon, crop_bbox)
+            if polygon is not None:
+                polygons_resize.append(polygon.astype(np.float32))
+            else:
+                polygons_resize.append(
+                    np.zeros_like(polygons[idx], dtype=np.float32))
+        results['gt_polygons'] = polygons_resize
 
     def transform(self, results: dict) -> dict:
         """Transform function to resize images, bounding boxes and polygons.
@@ -692,9 +690,10 @@ class FixInvalidPolygon(BaseTransform):
         assert min_poly_points >= 3, 'min_poly_points must be greater than 3.'
         self.min_poly_points = min_poly_points
         self.fix_from_bbox = fix_from_bbox
-        assert self.mode in [
-            'fix', 'ignore'
-        ], f"Supported modes are 'fix' and 'ignore', but got {self.mode}"
+        assert self.mode in {
+            'fix',
+            'ignore',
+        }, f"Supported modes are 'fix' and 'ignore', but got {self.mode}"
 
     def transform(self, results: Dict) -> Dict:
         """Fix invalid polygons.
@@ -712,9 +711,11 @@ class FixInvalidPolygon(BaseTransform):
                 if self.mode == 'ignore':
                     if results['gt_ignored'][idx]:
                         continue
-                    if not (len(polygon) >= self.min_poly_points * 2
-                            and len(polygon) % 2
-                            == 0) or not poly2shapely(polygon).is_valid:
+                    if (
+                        len(polygon) < self.min_poly_points * 2
+                        or len(polygon) % 2 != 0
+                        or not poly2shapely(polygon).is_valid
+                    ):
                         results['gt_ignored'][idx] = True
                 else:
                     # If "polygon" contains less than 3 points

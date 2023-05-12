@@ -52,15 +52,12 @@ class TestTextDetLocalVisualizer(unittest.TestCase):
         br_x = ((cx * w) + (w * bw / 2)).clamp(0, w).unsqueeze(0)
         br_y = ((cy * h) + (h * bh / 2)).clamp(0, h).unsqueeze(0)
 
-        bboxes = torch.cat([tl_x, tl_y, br_x, br_y], dim=0).T
-
-        return bboxes
+        return torch.cat([tl_x, tl_y, br_x, br_y], dim=0).T
 
     def _rand_polys(self, num_bboxes, h, w):
         bboxes = self._rand_bboxes(num_bboxes, h, w)
         bboxes = bboxes.tolist()
-        polys = [bbox2poly(bbox) for bbox in bboxes]
-        return polys
+        return [bbox2poly(bbox) for bbox in bboxes]
 
     def _test_add_datasample(self, vis_cfg):
         image = self.image

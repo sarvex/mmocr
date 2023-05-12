@@ -16,8 +16,7 @@ def parse_args():
         '--val-ratio', help='Split ratio for val set', default=0.0, type=float)
     parser.add_argument(
         '--nproc', default=1, type=int, help='Number of processes')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def convert_art(root_path, split, ratio):
@@ -79,7 +78,7 @@ def convert_art(root_path, split, ratio):
     img_info = []
     for prefix in img_prefixes:
         text_label = annotation[prefix][0]['transcription']
-        dst_img_name = prefix + '.jpg'
+        dst_img_name = f'{prefix}.jpg'
 
         img_info.append({
             'file_name': dst_img_name,

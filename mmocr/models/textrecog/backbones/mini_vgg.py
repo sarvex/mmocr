@@ -48,17 +48,15 @@ class MiniVGG(BaseModule):
                 cnn.add_module(f'relu{i}', nn.ReLU(True))
 
         conv_relu(0)
-        cnn.add_module(f'pooling{0}', nn.MaxPool2d(2, 2))  # 64x16x64
+        cnn.add_module('pooling0', nn.MaxPool2d(2, 2))
         conv_relu(1)
-        cnn.add_module(f'pooling{1}', nn.MaxPool2d(2, 2))  # 128x8x32
+        cnn.add_module('pooling1', nn.MaxPool2d(2, 2))
         conv_relu(2, True)
         conv_relu(3)
-        cnn.add_module(f'pooling{2}', nn.MaxPool2d((2, 2), (2, 1),
-                                                   (0, 1)))  # 256x4x16
+        cnn.add_module('pooling2', nn.MaxPool2d((2, 2), (2, 1), (0, 1)))
         conv_relu(4, True)
         conv_relu(5)
-        cnn.add_module(f'pooling{3}', nn.MaxPool2d((2, 2), (2, 1),
-                                                   (0, 1)))  # 512x2x16
+        cnn.add_module('pooling3', nn.MaxPool2d((2, 2), (2, 1), (0, 1)))
         conv_relu(6, True)  # 512x1x16
 
         self.cnn = cnn
@@ -74,6 +72,4 @@ class MiniVGG(BaseModule):
         Returns:
             Tensor: The feature Tensor of shape :math:`(N, 512, H/32, (W/4+1)`.
         """
-        output = self.cnn(x)
-
-        return output
+        return self.cnn(x)

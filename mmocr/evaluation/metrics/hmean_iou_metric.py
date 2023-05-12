@@ -71,7 +71,7 @@ class HmeanIOUMetric(BaseMetric):
         self.match_iou_thr = match_iou_thr
         self.ignore_precision_thr = ignore_precision_thr
         self.pred_score_thrs = np.arange(**pred_score_thrs)
-        assert strategy in ['max_matching', 'vanilla']
+        assert strategy in {'max_matching', 'vanilla'}
         self.strategy = strategy
 
     def process(self, data_batch: Sequence[Dict],

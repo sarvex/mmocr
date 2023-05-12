@@ -54,8 +54,9 @@ class SegBasedModuleLoss(BaseTextDetModuleLoss):
             area = poly_obj.area
             peri = poly_obj.length
             distance = min(
-                int(area * (1 - shrink_ratio * shrink_ratio) / (peri + 0.001) +
-                    0.5), max_shrink_dist)
+                int((area * (1 - shrink_ratio**2) / (peri + 0.001) + 0.5)),
+                max_shrink_dist,
+            )
             shrunk_poly = offset_polygon(poly, -distance)
 
             if len(shrunk_poly) == 0:

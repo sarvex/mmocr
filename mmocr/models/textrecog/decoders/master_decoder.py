@@ -225,10 +225,10 @@ class MasterDecoder(BaseDecoder):
             feat = feat.permute((0, 2, 1))
         feat = self.feat_positional_encoding(feat)
 
-        trg_seq = []
-        for target in data_samples:
-            trg_seq.append(target.gt_text.padded_indexes.to(feat.device))
-
+        trg_seq = [
+            target.gt_text.padded_indexes.to(feat.device)
+            for target in data_samples
+        ]
         trg_seq = torch.stack(trg_seq, dim=0)
 
         src_mask = None

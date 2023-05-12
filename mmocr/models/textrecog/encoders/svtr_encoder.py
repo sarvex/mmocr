@@ -34,8 +34,7 @@ class OverlapPatchEmbed(BaseModule):
 
         super().__init__(init_cfg=init_cfg)
 
-        assert num_layers in [2, 3], \
-            'The number of layers must belong to [2, 3]'
+        assert num_layers in {2, 3}, 'The number of layers must belong to [2, 3]'
         self.net = nn.Sequential()
         for num in range(num_layers, 0, -1):
             if (num == num_layers):
@@ -374,10 +373,7 @@ class MerigingBlock(BaseModule):
                 stride=stride,
                 padding=1)
         self.norm = nn.LayerNorm(out_channels)
-        if act is not None:
-            self.act = act()
-        else:
-            self.act = None
+        self.act = act() if act is not None else None
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward function.
@@ -492,21 +488,25 @@ class SVTREncoder(BaseModule):
         self.pos_drop = nn.Dropout(drop_rate)
         dpr = np.linspace(0, drop_path_rate, sum(depth))
 
-        self.blocks1 = nn.ModuleList([
-            MixingBlock(
-                embed_dims=embed_dims[0],
-                num_heads=num_heads[0],
-                mixer=mixer_types[0:depth[0]][i],
-                window_size=window_size[0],
-                input_shape=self.input_shape,
-                mlp_ratio=mlp_ratio,
-                qkv_bias=qkv_bias,
-                qk_scale=qk_scale,
-                drop=drop_rate,
-                attn_drop=attn_drop_rate,
-                drop_path=dpr[0:depth[0]][i],
-                prenorm=prenorm) for i in range(depth[0])
-        ])
+        self.blocks1 = nn.ModuleList(
+            [
+                MixingBlock(
+                    embed_dims=embed_dims[0],
+                    num_heads=num_heads[0],
+                    mixer=mixer_types[: depth[0]][i],
+                    window_size=window_size[0],
+                    input_shape=self.input_shape,
+                    mlp_ratio=mlp_ratio,
+                    qkv_bias=qkv_bias,
+                    qk_scale=qk_scale,
+                    drop=drop_rate,
+                    attn_drop=attn_drop_rate,
+                    drop_path=dpr[: depth[0]][i],
+                    prenorm=prenorm,
+                )
+                for i in range(depth[0])
+            ]
+        )
         self.downsample1 = MerigingBlock(
             in_channels=embed_dims[0],
             out_channels=embed_dims[1],
@@ -570,8 +570,8 @@ class SVTREncoder(BaseModule):
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
             trunc_normal_init(m.weight, mean=0, std=0.02)
-            if isinstance(m, nn.Linear) and m.bias is not None:
-                nn.init.zeros_(m.bias)
+        if isinstance(m, nn.Linear) and m.bias is not None:
+            nn.init.zeros_(m.bias)
         if isinstance(m, nn.LayerNorm):
             nn.init.zeros_(m.bias)
             nn.init.ones_(m.weight)

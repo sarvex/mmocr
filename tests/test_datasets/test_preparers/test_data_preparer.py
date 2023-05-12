@@ -33,8 +33,7 @@ class TestDataPreparer(unittest.TestCase):
 
     def _create_config(self):
         cfg_path = 'config.py'
-        cfg = ''
-        cfg += "data_root = ''\n"
+        cfg = '' + "data_root = ''\n"
         cfg += 'train_preparer=dict(\n'
         cfg += '    obtainer=dict(type="Fake"),\n'
         cfg += '    gatherer=dict(type="Fake"),\n'

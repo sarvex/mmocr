@@ -99,9 +99,7 @@ class CTCModuleLoss(BaseTextRecogModuleLoss):
                 input_lengths = torch.Tensor(input_lengths).long()
         loss_ctc = self.ctc_loss(outputs_for_loss, targets, input_lengths,
                                  target_lengths)
-        losses = dict(loss_ctc=loss_ctc)
-
-        return losses
+        return dict(loss_ctc=loss_ctc)
 
     def get_targets(
         self, data_samples: Sequence[TextRecogDataSample]

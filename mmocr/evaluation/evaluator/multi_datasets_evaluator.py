@@ -83,7 +83,7 @@ class MultiDatasetsEvaluator(Evaluator):
                     }
 
                     # Check metric name conflicts
-                    for name in metric_results.keys():
+                    for name in metric_results:
                         if name in metrics_results:
                             raise ValueError(
                                 'There are multiple evaluation results with '
@@ -91,10 +91,7 @@ class MultiDatasetsEvaluator(Evaluator):
                                 'sure all metrics have different prefixes.')
                     metrics_results.update(metric_results)
             metric.results.clear()
-        if is_main_process():
-            metrics_results = [metrics_results]
-        else:
-            metrics_results = [None]  # type: ignore
+        metrics_results = [metrics_results] if is_main_process() else [None]
         broadcast_object_list(metrics_results)
 
         return metrics_results[0]

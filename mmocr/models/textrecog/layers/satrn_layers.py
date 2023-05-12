@@ -203,11 +203,12 @@ class Adaptive2DPositionalEncoding(BaseModule):
     @staticmethod
     def _scale_factor_generate(d_hid: int) -> nn.Sequential:
         """Generate scale factor layers."""
-        scale_factor = nn.Sequential(
-            nn.Conv2d(d_hid, d_hid, kernel_size=1), nn.ReLU(inplace=True),
-            nn.Conv2d(d_hid, d_hid, kernel_size=1), nn.Sigmoid())
-
-        return scale_factor
+        return nn.Sequential(
+            nn.Conv2d(d_hid, d_hid, kernel_size=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(d_hid, d_hid, kernel_size=1),
+            nn.Sigmoid(),
+        )
 
     def forward(self, x: Tensor) -> Tensor:
         """Forward propagation of Locality Aware Feedforward module.

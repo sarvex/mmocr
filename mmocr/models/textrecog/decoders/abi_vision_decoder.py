@@ -138,12 +138,11 @@ class ABIVisionDecoder(BaseDecoder):
         attn_vecs = torch.bmm(attn_scores, v)  # (N, T, E)
 
         out_enc = self.cls(attn_vecs)
-        result = {
+        return {
             'feature': attn_vecs,
             'logits': out_enc,
-            'attn_scores': attn_scores.view(N, -1, H, W)
+            'attn_scores': attn_scores.view(N, -1, H, W),
         }
-        return result
 
     def forward_test(
             self,

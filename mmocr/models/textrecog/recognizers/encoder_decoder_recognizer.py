@@ -81,9 +81,7 @@ class EncoderDecoderRecognizer(BaseRecognizer):
             dict[str, tensor]: A dictionary of loss components.
         """
         feat = self.extract_feat(inputs)
-        out_enc = None
-        if self.with_encoder:
-            out_enc = self.encoder(feat, data_samples)
+        out_enc = self.encoder(feat, data_samples) if self.with_encoder else None
         return self.decoder.loss(feat, out_enc, data_samples)
 
     def predict(self, inputs: torch.Tensor, data_samples: RecSampleList,
@@ -102,9 +100,7 @@ class EncoderDecoderRecognizer(BaseRecognizer):
             results. Results are stored in ``pred_text``.
         """
         feat = self.extract_feat(inputs)
-        out_enc = None
-        if self.with_encoder:
-            out_enc = self.encoder(feat, data_samples)
+        out_enc = self.encoder(feat, data_samples) if self.with_encoder else None
         return self.decoder.predict(feat, out_enc, data_samples)
 
     def _forward(self,
@@ -124,7 +120,5 @@ class EncoderDecoderRecognizer(BaseRecognizer):
             Tensor: A tuple of features from ``decoder`` forward.
         """
         feat = self.extract_feat(inputs)
-        out_enc = None
-        if self.with_encoder:
-            out_enc = self.encoder(feat, data_samples)
+        out_enc = self.encoder(feat, data_samples) if self.with_encoder else None
         return self.decoder(feat, out_enc, data_samples)

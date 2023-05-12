@@ -66,13 +66,11 @@ def collect_annotations(files, nproc=1):
     assert isinstance(files, list)
     assert isinstance(nproc, int)
 
-    if nproc > 1:
-        images = mmengine.track_parallel_progress(
-            load_img_info, files, nproc=nproc)
-    else:
-        images = mmengine.track_progress(load_img_info, files)
-
-    return images
+    return (
+        mmengine.track_parallel_progress(load_img_info, files, nproc=nproc)
+        if nproc > 1
+        else mmengine.track_progress(load_img_info, files)
+    )
 
 
 def load_img_info(files):
@@ -168,8 +166,7 @@ def parse_args():
         '--val-ratio', help='Split ratio for val set', default=0.0, type=float)
     parser.add_argument(
         '--nproc', default=1, type=int, help='Number of process')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():

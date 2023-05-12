@@ -41,8 +41,7 @@ def track_parallel_progress_multi_args(func,
     assert isinstance(args, tuple)
     for arg in args:
         assert isinstance(arg, Iterable)
-    assert len(set([len(arg)
-                    for arg in args])) == 1, 'args must have same length'
+    assert len({len(arg) for arg in args}) == 1, 'args must have same length'
     task_num = len(args[0])
     tasks = zip(*args)
 

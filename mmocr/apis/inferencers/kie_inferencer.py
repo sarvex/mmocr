@@ -87,9 +87,7 @@ class KIEInferencer(BaseMMOCRInferencer):
             pipeline_cfg.pop(idx)
         # If it's in non-visual mode, self.pipeline will be specified.
         # Otherwise, file_pipeline and ndarray_pipeline will be specified.
-        if self.novisual:
-            return Compose(pipeline_cfg)
-        return super()._init_pipeline(cfg)
+        return Compose(pipeline_cfg) if self.novisual else super()._init_pipeline(cfg)
 
     @staticmethod
     def kie_collate(data_batch: Sequence) -> Any:
@@ -276,9 +274,8 @@ class KIEInferencer(BaseMMOCRInferencer):
         Returns:
             dict: The output dictionary.
         """
-        result = {}
         pred = data_sample.pred_instances
-        result['scores'] = pred.scores.cpu().numpy().tolist()
+        result = {'scores': pred.scores.cpu().numpy().tolist()}
         result['edge_scores'] = pred.edge_scores.cpu().numpy().tolist()
         result['edge_labels'] = pred.edge_labels.cpu().numpy().tolist()
         result['labels'] = pred.labels.cpu().numpy().tolist()

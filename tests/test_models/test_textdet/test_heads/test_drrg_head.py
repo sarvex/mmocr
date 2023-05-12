@@ -31,7 +31,7 @@ class TestDRRGHead(TestCase):
         angle = (np.random.random_sample((num_rois, 1)) * 2 - 1) * np.pi / 2
         cos, sin = np.cos(angle), np.sin(angle)
         comp_labels = np.random.randint(1, 3, (num_rois, 1))
-        num_rois = num_rois * np.ones((num_rois, 1))
+        num_rois *= np.ones((num_rois, 1))
         comp_attribs = np.hstack([num_rois, x, y, h, w, cos, sin, comp_labels])
         comp_attribs = comp_attribs.astype(np.float32)
         comp_attribs_ = comp_attribs.copy()
@@ -53,7 +53,7 @@ class TestDRRGHead(TestCase):
             feat_maps = torch.zeros((1, 10, 128, 128))
             self.drrg_head.out_conv.bias.data.fill_(-10)
             preds = self.drrg_head(feat_maps)
-            self.assertTrue(all([pred is None for pred in preds]))
+            self.assertTrue(all(pred is None for pred in preds))
 
 
 class TestLocalGraphs(TestCase):
@@ -74,7 +74,7 @@ class TestLocalGraphs(TestCase):
         angle = (np.random.random_sample((num_rois, 1)) * 2 - 1) * np.pi / 2
         cos, sin = np.cos(angle), np.sin(angle)
         comp_labels = np.random.randint(1, 3, (num_rois, 1))
-        num_rois = num_rois * np.ones((num_rois, 1))
+        num_rois *= np.ones((num_rois, 1))
         comp_attribs = np.hstack([num_rois, x, y, h, w, cos, sin, comp_labels])
         comp_attribs = comp_attribs.astype(np.float32)
         comp_attribs_ = comp_attribs.copy()
@@ -83,7 +83,7 @@ class TestLocalGraphs(TestCase):
         (node_feats, adjacent_matrix, knn_inds,
          linkage_labels) = local_graph_generator(feature_maps, comp_attribs)
         feat_len = geo_feat_len + \
-            feature_maps.size()[1] * pooling_h * pooling_w
+                feature_maps.size()[1] * pooling_h * pooling_w
 
         self.assertTrue(node_feats.dim() == adjacent_matrix.dim() == 3)
         self.assertEqual(node_feats.size()[-1], feat_len)

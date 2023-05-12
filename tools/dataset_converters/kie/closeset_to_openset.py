@@ -106,8 +106,7 @@ def parse_args():
         'to one class in openset.')
     parser.add_argument(
         '--n_proc', type=int, default=10, help='Number of process.')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():

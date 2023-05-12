@@ -29,7 +29,7 @@ def warp_img(src_img,
     assert len(box) == 8
 
     h, w = src_img.shape[:2]
-    points_x = [min(max(x, 0), w) for x in box[0:8:2]]
+    points_x = [min(max(x, 0), w) for x in box[:8:2]]
     points_y = [min(max(y, 0), h) for y in box[1:9:2]]
 
     points_x, points_y = sort_vertex(points_x, points_y)
@@ -54,10 +54,7 @@ def warp_img(src_img,
     pts2 = np.float32([[0, 0], [box_width, 0], [box_width, box_height],
                        [0, box_height]])
     M = cv2.getPerspectiveTransform(pts1, pts2)
-    dst_img = cv2.warpPerspective(src_img, M,
-                                  (int(box_width), int(box_height)))
-
-    return dst_img
+    return cv2.warpPerspective(src_img, M, (int(box_width), int(box_height)))
 
 
 def crop_img(src_img, box, long_edge_pad_ratio=0.4, short_edge_pad_ratio=0.2):
@@ -84,7 +81,7 @@ def crop_img(src_img, box, long_edge_pad_ratio=0.4, short_edge_pad_ratio=0.2):
     assert 0. <= short_edge_pad_ratio < 1.0
 
     h, w = src_img.shape[:2]
-    points_x = np.clip(np.array(box[0::2]), 0, w)
+    points_x = np.clip(np.array(box[::2]), 0, w)
     points_y = np.clip(np.array(box[1::2]), 0, h)
 
     box_width = np.max(points_x) - np.min(points_x)
@@ -103,6 +100,4 @@ def crop_img(src_img, box, long_edge_pad_ratio=0.4, short_edge_pad_ratio=0.2):
     right = np.clip(int(np.max(points_x) + horizontal_pad), 0, w)
     bottom = np.clip(int(np.max(points_y) + vertical_pad), 0, h)
 
-    dst_img = src_img[top:bottom, left:right]
-
-    return dst_img
+    return src_img[top:bottom, left:right]

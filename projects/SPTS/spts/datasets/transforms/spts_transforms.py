@@ -109,9 +109,7 @@ class LoadOCRAnnotationsWithBezier(LoadOCRAnnotations):
         Returns:
             dict: The dict contains loaded text annotations.
         """
-        gt_beziers = []
-        for instance in results['instances']:
-            gt_beziers.append(instance['beziers'])
+        gt_beziers = [instance['beziers'] for instance in results['instances']]
         results['gt_beziers'] = gt_beziers
 
     def transform(self, results: dict) -> dict:
@@ -261,10 +259,7 @@ class RescaleToShortSide(BaseTransform):
                  **resize_kwargs):
         self.short_side_lens = short_side_lens
         self.long_side_bound = long_side_bound
-        self.resize_cfg = dict(type=resize_type, **resize_kwargs)
-
-        # create a empty Reisize object
-        self.resize_cfg.update(dict(scale=0))
+        self.resize_cfg = dict(type=resize_type, **resize_kwargs) | {'scale': 0}
         self.resize = TRANSFORMS.build(self.resize_cfg)
 
     def transform(self, results: Dict) -> Dict:

@@ -42,9 +42,7 @@ class TestKIEInferencer(TestCase):
             datum_novisual = dict(img_shape=(anno['height'], anno['width']))
             datum_novisual['instances'] = []
             for ann in anno['annotations']:
-                instance = {}
-                instance['bbox'] = poly2bbox(
-                    np.array(ann['box'], dtype=np.float32))
+                instance = {'bbox': poly2bbox(np.array(ann['box'], dtype=np.float32))}
                 instance['text'] = ann['text']
                 datum_novisual['instances'].append(instance)
             self.data_novisual.append(datum_novisual)

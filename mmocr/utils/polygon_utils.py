@@ -39,7 +39,7 @@ def rescale_polygon(polygon: ArrayLike,
         np.ndarray: Rescaled polygon.
     """
     assert len(polygon) % 2 == 0
-    assert mode in ['mul', 'div']
+    assert mode in {'mul', 'div'}
     polygon = np.array(polygon, dtype=np.float32)
     poly_shape = polygon.shape
     reshape_polygon = polygon.reshape(-1, 2)
@@ -75,9 +75,9 @@ def rescale_polygons(polygons: Union[ArrayLike, Sequence[ArrayLike]],
         list[np.ndarray] or np.ndarray: Rescaled polygons. The type of the
         return value depends on the type of the input polygons.
     """
-    results = []
-    for polygon in polygons:
-        results.append(rescale_polygon(polygon, scale_factor, mode))
+    results = [
+        rescale_polygon(polygon, scale_factor, mode) for polygon in polygons
+    ]
     if isinstance(polygons, np.ndarray):
         results = np.array(results)
     return results
@@ -160,13 +160,10 @@ def crop_polygon(polygon: ArrayLike,
     if area == 0 or area is None or not isinstance(
             poly_cropped, shapely.geometry.polygon.Polygon):
         return None
-    else:
-        poly_cropped = poly_make_valid(poly_cropped)
-        poly_cropped = np.array(poly_cropped.boundary.xy, dtype=np.float32)
-        poly_cropped = poly_cropped.T
-        # reverse poly_cropped to have clockwise order
-        poly_cropped = poly_cropped[::-1, :].reshape(-1)
-        return poly_cropped
+    poly_cropped = poly_make_valid(poly_cropped)
+    poly_cropped = np.array(poly_cropped.boundary.xy, dtype=np.float32)
+    poly_cropped = poly_cropped.T
+    return poly_cropped[::-1, :].reshape(-1)
 
 
 def poly_make_valid(poly: Polygon) -> Polygon:
@@ -453,5 +450,4 @@ def sort_vertex8(points):
     """Sort vertex with 8 points [x1 y1 x2 y2 x3 y3 x4 y4]"""
     assert len(points) == 8
     vertices = _sort_vertex(np.array(points, dtype=np.float32).reshape(-1, 2))
-    sorted_box = list(vertices.flatten())
-    return sorted_box
+    return list(vertices.flatten())

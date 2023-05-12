@@ -16,10 +16,7 @@ from mmocr.testing import create_dummy_dict_file
 class TestBaseRecogModuleLoss(TestCase):
 
     def _equal(self, a, b):
-        if isinstance(a, (torch.Tensor, np.ndarray)):
-            return (a == b).all()
-        else:
-            return a == b
+        return (a == b).all() if isinstance(a, (torch.Tensor, np.ndarray)) else a == b
 
     def test_init(self):
         tmp_dir = tempfile.TemporaryDirectory()

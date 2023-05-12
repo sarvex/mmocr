@@ -23,22 +23,22 @@ for file in files:
 
     # Extract title
     expr = '# (.*?)\n'
-    title = re.search(expr, content).group(1)
+    title = re.search(expr, content)[1]
     project_zoo += f'## {title}\n\n'
 
     # Locate the description
     expr = '## Description\n(.*?)##'
-    description = re.search(expr, content, re.DOTALL).group(1)
+    description = re.search(expr, content, re.DOTALL)[1]
     project_zoo += f'{description}\n'
 
     # check milestone 1
     expr = r'- \[(.?)\] Milestone 1'
-    state = re.search(expr, content, re.DOTALL).group(1)
+    state = re.search(expr, content, re.DOTALL)[1]
     infer_state = '✔' if state == 'x' else '❌'
 
     # check milestone 2
     expr = r'- \[(.?)\] Milestone 2'
-    state = re.search(expr, content, re.DOTALL).group(1)
+    state = re.search(expr, content, re.DOTALL)[1]
     training_state = '✔' if state == 'x' else '❌'
 
     # add table

@@ -9,8 +9,7 @@ dataset_zoo_path = '../../dataset_zoo'
 datasets = os.listdir(dataset_zoo_path)
 datasets.sort()
 
-table = '# Overview\n'
-table += '## Supported Datasets\n'
+table = '# Overview\n' + '## Supported Datasets\n'
 table += '| Dataset Name | Text Detection | Text Recognition | Text Spotting | KIE |\n' \
          '|--------------|----------------|------------------|---------------|-----|\n'  # noqa: E501
 details = '## Dataset Details\n'
@@ -24,30 +23,22 @@ for dataset in datasets:
     paper = meta['Paper']
     data = meta['Data']
 
-    table += '| [{}](#{}) | {} | {} | {} | {} |\n'.format(
-        dataset,
-        detail_link,
-        '✓' if 'textdet' in data['Tasks'] else '',
-        '✓' if 'textrecog' in data['Tasks'] else '',
-        '✓' if 'textspotting' in data['Tasks'] else '',
-        '✓' if 'kie' in data['Tasks'] else '',
-    )
+    table += f"| [{dataset}](#{detail_link}) | {'✓' if 'textdet' in data['Tasks'] else ''} | {'✓' if 'textrecog' in data['Tasks'] else ''} | {'✓' if 'textspotting' in data['Tasks'] else ''} | {'✓' if 'kie' in data['Tasks'] else ''} |\n"
 
-    details += '### {}\n'.format(dataset_name)
-    details += "> \"{}\", *{}*, {}. [PDF]({})\n\n".format(
-        paper['Title'], paper['Venue'], paper['Year'], paper['URL'])
+    details += f'### {dataset_name}\n'
+    details += f"""> \"{paper['Title']}\", *{paper['Venue']}*, {paper['Year']}. [PDF]({paper['URL']})\n\n"""
 
     # Basic Info
     details += 'A. Basic Info\n'
-    details += ' - Official Website: [{}]({})\n'.format(
-        dataset, data['Website'])
-    details += ' - Year: {}\n'.format(paper['Year'])
-    details += ' - Language: {}\n'.format(data['Language'])
-    details += ' - Scene: {}\n'.format(data['Scene'])
-    details += ' - Annotation Granularity: {}\n'.format(data['Granularity'])
-    details += ' - Supported Tasks: {}\n'.format(data['Tasks'])
-    details += ' - License: [{}]({})\n'.format(data['License']['Type'],
-                                               data['License']['Link'])
+    details += f" - Official Website: [{dataset}]({data['Website']})\n"
+    details += f" - Year: {paper['Year']}\n"
+    details += f" - Language: {data['Language']}\n"
+    details += f" - Scene: {data['Scene']}\n"
+    details += f" - Annotation Granularity: {data['Granularity']}\n"
+    details += f" - Supported Tasks: {data['Tasks']}\n"
+    details += (
+        f" - License: [{data['License']['Type']}]({data['License']['Link']})\n"
+    )
 
     # Format
     details += '<details> <summary>B. Annotation Format</summary>\n\n</br>'
@@ -61,7 +52,7 @@ for dataset in datasets:
 
     # Reference
     details += 'C. Reference\n'
-    details += '```bibtex\n{}\n```\n'.format(paper['BibTeX'])
+    details += f"```bibtex\n{paper['BibTeX']}\n```\n"
 
 datasetzoo = table + details
 

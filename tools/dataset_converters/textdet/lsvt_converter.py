@@ -15,8 +15,7 @@ def parse_args():
     parser.add_argument('root_path', help='Root dir path of LSVT')
     parser.add_argument(
         '--val-ratio', help='Split ratio for val set', default=0.0, type=float)
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def collect_lsvt_info(root_path, split, ratio, print_every=1000):
@@ -76,7 +75,7 @@ def collect_lsvt_info(root_path, split, ratio, print_every=1000):
     for i, prefix in enumerate(img_prefixes):
         if i > 0 and i % print_every == 0:
             print(f'{i}/{len(img_prefixes)}')
-        img_file = osp.join(root_path, 'imgs', prefix + '.jpg')
+        img_file = osp.join(root_path, 'imgs', f'{prefix}.jpg')
         # Skip not exist images
         if not osp.exists(img_file):
             continue
@@ -92,8 +91,7 @@ def collect_lsvt_info(root_path, split, ratio, print_every=1000):
         for ann in annotation[prefix]:
             segmentation = []
             for x, y in ann['points']:
-                segmentation.append(max(0, x))
-                segmentation.append(max(0, y))
+                segmentation.extend((max(0, x), max(0, y)))
             xs, ys = segmentation[::2], segmentation[1::2]
             x, y = min(xs), min(ys)
             w, h = max(xs) - x, max(ys) - y

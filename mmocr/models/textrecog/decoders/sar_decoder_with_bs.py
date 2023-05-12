@@ -27,8 +27,7 @@ class DecodeNode:
 
     def eval(self):
         """Calculate accumulated score."""
-        accu_score = sum(self.scores)
-        return accu_score
+        return sum(self.scores)
 
 
 @MODELS.register_module()

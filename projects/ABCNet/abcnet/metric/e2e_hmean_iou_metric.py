@@ -79,7 +79,7 @@ class E2EHmeanIOUMetric(BaseMetric):
         self.word_spotting = word_spotting
         self.min_length_case_word = min_length_case_word
         self.special_characters = special_characters
-        assert strategy in ['max_matching', 'vanilla']
+        assert strategy in {'max_matching', 'vanilla'}
         self.strategy = strategy
 
     def process(self, data_batch: Sequence[Dict],
@@ -173,7 +173,7 @@ class E2EHmeanIOUMetric(BaseMetric):
                     for j in self._true_indexes(~pred_ignore_flags)
                 ]
                 matched_metric = iou_metric[:, ~pred_ignore_flags] \
-                    > self.match_iou_thr
+                        > self.match_iou_thr
                 if self.strategy == 'max_matching':
                     csr_matched_metric = csr_matrix(matched_metric)
                     matched_preds = maximum_bipartite_matching(
@@ -187,17 +187,16 @@ class E2EHmeanIOUMetric(BaseMetric):
                     matched_e2e_gt_indexes = set()
                     for gt_idx, pred_idx in zip(*np.nonzero(matched_metric)):
                         if gt_idx in matched_gt_indexes or \
-                          pred_idx in matched_pred_indexes:
+                              pred_idx in matched_pred_indexes:
                             continue
                         matched_gt_indexes.add(gt_idx)
                         matched_pred_indexes.add(pred_idx)
                         if self.word_spotting:
                             if gt_texts[gt_idx] == pred_texts[pred_idx]:
                                 matched_e2e_gt_indexes.add(gt_idx)
-                        else:
-                            if self.text_match(gt_texts[gt_idx].upper(),
+                        elif self.text_match(gt_texts[gt_idx].upper(),
                                                pred_texts[pred_idx].upper()):
-                                matched_e2e_gt_indexes.add(gt_idx)
+                            matched_e2e_gt_indexes.add(gt_idx)
                     dataset_hit_num[i] += len(matched_e2e_gt_indexes)
                 dataset_pred_num[i] += np.sum(~pred_ignore_flags)
 
@@ -261,8 +260,8 @@ class E2EHmeanIOUMetric(BaseMetric):
         If not, the text will be cared as don't care
         """
         # special case 's at final
-        if text[len(text) - 2:] == "'s" or text[len(text) - 2:] == "'S":
-            text = text[0:len(text) - 2]
+        if text[len(text) - 2 :] in ["'s", "'S"]:
+            text = text[:len(text) - 2]
 
         # hyphens at init or final of the word
         text = text.strip('-')
@@ -289,7 +288,7 @@ class E2EHmeanIOUMetric(BaseMetric):
 
         for char in text:
             charCode = ord(char)
-            if (notAllowed.find(char) != -1):
+            if char in notAllowed:
                 return False
             # TODO: optimize it with for loop
             valid = (charCode >= range1[0] and charCode <= range1[1]) or (
@@ -310,8 +309,8 @@ class E2EHmeanIOUMetric(BaseMetric):
         It removes special characters or terminations
         """
         # special case 's at final
-        if text[len(text) - 2:] == "'s" or text[len(text) - 2:] == "'S":
-            text = text[0:len(text) - 2]
+        if text[len(text) - 2 :] in ["'s", "'S"]:
+            text = text[:len(text) - 2]
 
         # hyphens at init or final of the word
         text = text.strip('-')
@@ -334,20 +333,23 @@ class E2EHmeanIOUMetric(BaseMetric):
             if (gt_text == pred_text):
                 return True
 
-            if self.special_characters.find(gt_text[0]) > -1:
-                if gt_text[1:] == pred_text:
-                    return True
+            if (
+                self.special_characters.find(gt_text[0]) > -1
+                and gt_text[1:] == pred_text
+            ):
+                return True
 
-            if self.special_characters.find(gt_text[-1]) > -1:
-                if gt_text[0:len(gt_text) - 1] == pred_text:
-                    return True
+            if (
+                self.special_characters.find(gt_text[-1]) > -1
+                and gt_text[:-1] == pred_text
+            ):
+                return True
 
-            if self.special_characters.find(
-                    gt_text[0]) > -1 and self.special_characters.find(
-                        gt_text[-1]) > -1:
-                if gt_text[1:len(gt_text) - 1] == pred_text:
-                    return True
-            return False
+            return (
+                self.special_characters.find(gt_text[0]) > -1
+                and self.special_characters.find(gt_text[-1]) > -1
+                and gt_text[1:-1] == pred_text
+            )
         else:
             # Special characters are removed from the beginning and the end of
             # both Detection and GroundTruth
@@ -361,10 +363,10 @@ class E2EHmeanIOUMetric(BaseMetric):
 
             while len(gt_text) > 0 and self.special_characters.find(
                     gt_text[-1]) > -1:
-                gt_text = gt_text[0:len(gt_text) - 1]
+                gt_text = gt_text[:-1]
 
             while len(pred_text) > 0 and self.special_characters.find(
                     pred_text[-1]) > -1:
-                pred_text = pred_text[0:len(pred_text) - 1]
+                pred_text = pred_text[:-1]
 
             return gt_text == pred_text

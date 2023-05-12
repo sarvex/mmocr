@@ -50,8 +50,7 @@ def parse_args():
         help='Output annotation type, defaults to "auto", which decides the'
         'best task type based on whether "text" is annotated. Other options'
         'are "textdet" and "textspotter".')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():

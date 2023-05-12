@@ -37,9 +37,9 @@ class WildreceiptTextDetAnnParser(BaseParser):
     def parse_files(self, img_dir: str, ann_path) -> Dict:
         """Convert single annotation."""
         closeset_lines = list_from_file(ann_path)
-        samples = list()
+        samples = []
         for line in closeset_lines:
-            instances = list()
+            instances = []
             line = json.loads(line)
             img_file = osp.join(img_dir, osp.basename(line['file_name']))
             for anno in line['annotations']:
@@ -81,7 +81,7 @@ class WildreceiptKIEAnnParser(BaseParser):
     def parse_files(self, img_dir: str, ann_path: str) -> Dict:
         """Convert single annotation."""
         closeset_lines = list_from_file(ann_path)
-        samples = list()
+        samples = []
         for line in closeset_lines:
             json_line = json.loads(line)
             img_file = osp.join(img_dir, osp.basename(json_line['file_name']))

@@ -233,7 +233,7 @@ class KIELocalVisualizer(BaseLocalVisualizer):
             out_file (str): Path to output file. Defaults to None.
             step (int): Global step value to record. Defaults to 0.
         """
-        cat_images = list()
+        cat_images = []
 
         if draw_gt:
             gt_bboxes = data_sample.gt_instances.bboxes
@@ -382,21 +382,22 @@ class KIELocalVisualizer(BaseLocalVisualizer):
             warnings.warn(
                 'Warning: The line is out of bounds,'
                 ' the drawn line may not be in the image', UserWarning)
-        arrows = []
-        for i in range(number_arrow):
-            arrows.append(
-                FancyArrow(
-                    *tuple(lines[i, 0]),
-                    *tuple(lines[i, 1] - lines[i, 0]),
-                    linestyle=line_styles[i],
-                    color=colors[i],
-                    length_includes_head=True,
-                    width=arrow_tail_widths[i],
-                    head_width=arrow_head_widths[i],
-                    head_length=arrow_head_lengths[i],
-                    overhang=overhangs[i],
-                    shape=arrow_shapes[i],
-                    linewidth=line_widths[i]))
+        arrows = [
+            FancyArrow(
+                *tuple(lines[i, 0]),
+                *tuple(lines[i, 1] - lines[i, 0]),
+                linestyle=line_styles[i],
+                color=colors[i],
+                length_includes_head=True,
+                width=arrow_tail_widths[i],
+                head_width=arrow_head_widths[i],
+                head_length=arrow_head_lengths[i],
+                overhang=overhangs[i],
+                shape=arrow_shapes[i],
+                linewidth=line_widths[i]
+            )
+            for i in range(number_arrow)
+        ]
         p = PatchCollection(arrows, match_original=True)
         self.ax_save.add_collection(p)
         return self

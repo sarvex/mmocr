@@ -194,19 +194,15 @@ class NRTRDecoder(BaseDecoder):
             Tensor: The raw logit tensor. Shape :math:`(N, T, C)` where
             :math:`C` is ``num_classes``.
         """
-        valid_ratios = []
-        for data_sample in data_samples:
-            valid_ratios.append(data_sample.get('valid_ratio'))
+        valid_ratios = [data_sample.get('valid_ratio') for data_sample in data_samples]
         src_mask = self._get_source_mask(out_enc, valid_ratios)
-        trg_seq = []
-        for data_sample in data_samples:
-            trg_seq.append(
-                data_sample.gt_text.padded_indexes.to(out_enc.device))
+        trg_seq = [
+            data_sample.gt_text.padded_indexes.to(out_enc.device)
+            for data_sample in data_samples
+        ]
         trg_seq = torch.stack(trg_seq, dim=0)
         attn_output = self._attention(trg_seq, out_enc, src_mask=src_mask)
-        outputs = self.classifier(attn_output)
-
-        return outputs
+        return self.classifier(attn_output)
 
     def forward_test(self,
                      feat: Optional[torch.Tensor] = None,
@@ -229,9 +225,7 @@ class NRTRDecoder(BaseDecoder):
             :math:`(N, self.max_seq_len, C)` where :math:`C` is
             ``num_classes``.
         """
-        valid_ratios = []
-        for data_sample in data_samples:
-            valid_ratios.append(data_sample.get('valid_ratio'))
+        valid_ratios = [data_sample.get('valid_ratio') for data_sample in data_samples]
         src_mask = self._get_source_mask(out_enc, valid_ratios)
         N = out_enc.size(0)
         init_target_seq = torch.full((N, self.max_seq_len + 1),

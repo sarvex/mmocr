@@ -86,7 +86,7 @@ class TextDetConfigGenerator(BaseDatasetConfigGenerator):
         for key_name, ann_dict in self.anns.items():
             cfg += f'\n{key_name} = dict(\n'
             cfg += '    type=\'OCRDataset\',\n'
-            cfg += '    data_root=' + f'{self.dataset_name}_{self.task}_data_root,\n'  # noqa: E501
+            cfg += f'    data_root={self.dataset_name}_{self.task}_data_root,\n'
             cfg += f'    ann_file=\'{ann_dict["ann_file"]}\',\n'
             if ann_dict['split'] == 'train':
                 cfg += '    filter_cfg=dict(filter_empty_gt=True, min_size=32),\n'  # noqa: E501

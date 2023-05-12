@@ -65,14 +65,14 @@ class CTW1500AnnParser(BaseParser):
         Returns:
             list[Dict]: List of instances.
         """
-        instances = list()
+        instances = []
         for line in list_from_file(anno_dir):
             # each line has one ploygen (n vetices), and one text.
             # e.g., 695,885,866,888,867,1146,696,1143,####Latin 9
             line = line.strip()
             strs = line.split(',')
             assert strs[28][0] == '#'
-            xy = [int(x) for x in strs[0:28]]
+            xy = [int(x) for x in strs[:28]]
             assert len(xy) == 28
             poly = np.array(xy).reshape(-1).tolist()
             text = strs[28][4:]
@@ -89,7 +89,7 @@ class CTW1500AnnParser(BaseParser):
             list[Dict]: List of instances.
         """
         obj = ET.parse(anno_dir)
-        instances = list()
+        instances = []
         for image in obj.getroot():  # image
             for box in image:  # image
                 text = box[0].text

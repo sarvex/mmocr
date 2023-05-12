@@ -37,11 +37,7 @@ def remove_pipeline_elements(results: Dict,
         'gt_polygons', 'gt_bboxes', 'gt_bboxes_labels', 'gt_ignored',
         'gt_texts'
     ]
-    num_elements = -1
-    for key in keys:
-        if key in results:
-            num_elements = len(results[key])
-            break
+    num_elements = next((len(results[key]) for key in keys if key in results), -1)
     if num_elements == -1:
         return results
     kept_inds = np.array(

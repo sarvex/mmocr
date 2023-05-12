@@ -75,25 +75,24 @@ class ABIModuleLoss(BaseTextRecogModuleLoss):
             the output of its corresponding module is not given.
         """
         assert 'out_vis' in outputs or \
-            'out_langs' in outputs or 'out_fusers' in outputs
+                'out_langs' in outputs or 'out_fusers' in outputs
         losses = {}
 
         if outputs.get('out_vis', None):
             losses['loss_visual'] = self.weight_vis * self._ce_loss(
                 outputs['out_vis']['logits'], data_samples)['loss_ce']
         if outputs.get('out_langs', None):
-            lang_losses = []
-            for out_lang in outputs['out_langs']:
-                lang_losses.append(
-                    self._ce_loss(out_lang['logits'], data_samples)['loss_ce'])
+            lang_losses = [
+                self._ce_loss(out_lang['logits'], data_samples)['loss_ce']
+                for out_lang in outputs['out_langs']
+            ]
             losses['loss_lang'] = self.weight_lang * torch.mean(
                 torch.stack(lang_losses))
         if outputs.get('out_fusers', None):
-            fuser_losses = []
-            for out_fuser in outputs['out_fusers']:
-                fuser_losses.append(
-                    self._ce_loss(out_fuser['logits'],
-                                  data_samples)['loss_ce'])
+            fuser_losses = [
+                self._ce_loss(out_fuser['logits'], data_samples)['loss_ce']
+                for out_fuser in outputs['out_fusers']
+            ]
             losses['loss_fusion'] = self.weight_fusion * torch.mean(
                 torch.stack(fuser_losses))
         return losses

@@ -46,7 +46,7 @@ class PyramidRescale(BaseTransform):
         if not isinstance(base_shape, (list, tuple)):
             raise TypeError('`base_shape` should be a list or tuple, '
                             f'but got {type(base_shape)} instead')
-        if not len(base_shape) == 2:
+        if len(base_shape) != 2:
             raise ValueError('`base_shape` should contain two integers')
         if not isinstance(base_shape[0], int) or not isinstance(
                 base_shape[1], int):
@@ -154,8 +154,7 @@ class RescaleToHeight(BaseTransform):
         self.height = height
         self.min_width = min_width
         self.max_width = max_width
-        self.resize_cfg = dict(type=resize_type, **resize_kwargs)
-        self.resize_cfg.update(dict(scale=0))
+        self.resize_cfg = dict(type=resize_type, **resize_kwargs) | {'scale': 0}
         self.resize = TRANSFORMS.build(self.resize_cfg)
 
     def transform(self, results: Dict) -> Dict:
@@ -226,8 +225,7 @@ class PadToWidth(BaseTransform):
         assert isinstance(width, int)
         self.width = width
         self.pad_cfg = pad_cfg
-        _pad_cfg = self.pad_cfg.copy()
-        _pad_cfg.update(dict(size=0))
+        _pad_cfg = self.pad_cfg | {'size': 0}
         self.pad = TRANSFORMS.build(_pad_cfg)
 
     def transform(self, results: Dict) -> Dict:
@@ -315,42 +313,30 @@ class TextRecogGeneralAug(BaseTransform):
         cut = img_w // segment
         thresh = cut // 3
 
-        src_pts = list()
-        dst_pts = list()
-
-        src_pts.append([0, 0])
-        src_pts.append([img_w, 0])
-        src_pts.append([img_w, img_h])
-        src_pts.append([0, img_h])
-
-        dst_pts.append([np.random.randint(thresh), np.random.randint(thresh)])
-        dst_pts.append(
-            [img_w - np.random.randint(thresh),
-             np.random.randint(thresh)])
-        dst_pts.append([
-            img_w - np.random.randint(thresh),
-            img_h - np.random.randint(thresh)
-        ])
-        dst_pts.append(
-            [np.random.randint(thresh), img_h - np.random.randint(thresh)])
-
+        src_pts = [[0, 0], [img_w, 0], [img_w, img_h], [0, img_h]]
+        dst_pts = [
+            [np.random.randint(thresh), np.random.randint(thresh)],
+            [img_w - np.random.randint(thresh), np.random.randint(thresh)],
+            [img_w - np.random.randint(thresh), img_h - np.random.randint(thresh)],
+            [np.random.randint(thresh), img_h - np.random.randint(thresh)],
+        ]
         half_thresh = thresh * 0.5
 
         for cut_idx in np.arange(1, segment, 1):
-            src_pts.append([cut * cut_idx, 0])
-            src_pts.append([cut * cut_idx, img_h])
-            dst_pts.append([
-                cut * cut_idx + np.random.randint(thresh) - half_thresh,
-                np.random.randint(thresh) - half_thresh
-            ])
-            dst_pts.append([
-                cut * cut_idx + np.random.randint(thresh) - half_thresh,
-                img_h + np.random.randint(thresh) - half_thresh
-            ])
-
-        dst = self.warp_mls(img, src_pts, dst_pts, img_w, img_h)
-
-        return dst
+            src_pts.extend(([cut * cut_idx, 0], [cut * cut_idx, img_h]))
+            dst_pts.extend(
+                (
+                    [
+                        cut * cut_idx + np.random.randint(thresh) - half_thresh,
+                        np.random.randint(thresh) - half_thresh,
+                    ],
+                    [
+                        cut * cut_idx + np.random.randint(thresh) - half_thresh,
+                        img_h + np.random.randint(thresh) - half_thresh,
+                    ],
+                )
+            )
+        return self.warp_mls(img, src_pts, dst_pts, img_w, img_h)
 
     def tia_stretch(self, img: np.ndarray, segment: int = 4) -> np.ndarray:
         """Image stretching.
@@ -365,31 +351,15 @@ class TextRecogGeneralAug(BaseTransform):
         cut = img_w // segment
         thresh = cut * 4 // 5
 
-        src_pts = list()
-        dst_pts = list()
-
-        src_pts.append([0, 0])
-        src_pts.append([img_w, 0])
-        src_pts.append([img_w, img_h])
-        src_pts.append([0, img_h])
-
-        dst_pts.append([0, 0])
-        dst_pts.append([img_w, 0])
-        dst_pts.append([img_w, img_h])
-        dst_pts.append([0, img_h])
-
+        src_pts = [[0, 0], [img_w, 0], [img_w, img_h], [0, img_h]]
+        dst_pts = [[0, 0], [img_w, 0], [img_w, img_h], [0, img_h]]
         half_thresh = thresh * 0.5
 
         for cut_idx in np.arange(1, segment, 1):
             move = np.random.randint(thresh) - half_thresh
-            src_pts.append([cut * cut_idx, 0])
-            src_pts.append([cut * cut_idx, img_h])
-            dst_pts.append([cut * cut_idx + move, 0])
-            dst_pts.append([cut * cut_idx + move, img_h])
-
-        dst = self.warp_mls(img, src_pts, dst_pts, img_w, img_h)
-
-        return dst
+            src_pts.extend(([cut * cut_idx, 0], [cut * cut_idx, img_h]))
+            dst_pts.extend(([cut * cut_idx + move, 0], [cut * cut_idx + move, img_h]))
+        return self.warp_mls(img, src_pts, dst_pts, img_w, img_h)
 
     def tia_perspective(self, img: np.ndarray) -> np.ndarray:
         """Image perspective transformation.
@@ -403,22 +373,14 @@ class TextRecogGeneralAug(BaseTransform):
 
         thresh = img_h // 2
 
-        src_pts = list()
-        dst_pts = list()
-
-        src_pts.append([0, 0])
-        src_pts.append([img_w, 0])
-        src_pts.append([img_w, img_h])
-        src_pts.append([0, img_h])
-
-        dst_pts.append([0, np.random.randint(thresh)])
-        dst_pts.append([img_w, np.random.randint(thresh)])
-        dst_pts.append([img_w, img_h - np.random.randint(thresh)])
-        dst_pts.append([0, img_h - np.random.randint(thresh)])
-
-        dst = self.warp_mls(img, src_pts, dst_pts, img_w, img_h)
-
-        return dst
+        src_pts = [[0, 0], [img_w, 0], [img_w, img_h], [0, img_h]]
+        dst_pts = [
+            [0, np.random.randint(thresh)],
+            [img_w, np.random.randint(thresh)],
+            [img_w, img_h - np.random.randint(thresh)],
+            [0, img_h - np.random.randint(thresh)],
+        ]
+        return self.warp_mls(img, src_pts, dst_pts, img_w, img_h)
 
     def warp_mls(self,
                  src: np.ndarray,
@@ -615,7 +577,7 @@ class CropHeight(BaseTransform):
     @cache_randomness
     def get_random_vars(self):
         """Get all the random values used in this transform."""
-        crop_pixels = int(random.randint(self.min_pixels, self.max_pixels))
+        crop_pixels = random.randint(self.min_pixels, self.max_pixels)
         crop_top = random.randint(0, 1)
         return crop_pixels, crop_top
 
@@ -632,10 +594,7 @@ class CropHeight(BaseTransform):
         crop_pixels, crop_top = self.get_random_vars()
         crop_pixels = min(crop_pixels, h - 1)
         img = results['img'].copy()
-        if crop_top:
-            img = img[crop_pixels:h, :, :]
-        else:
-            img = img[0:h - crop_pixels, :, :]
+        img = img[crop_pixels:h, :, :] if crop_top else img[0:h - crop_pixels, :, :]
         results['img_shape'] = img.shape[:2]
         results['img'] = img
         return results

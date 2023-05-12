@@ -82,8 +82,7 @@ def parse_args():
         'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
         'Note that the quotation marks are necessary and that no white space '
         'is allowed.')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def _get_adaptive_scale(img_shape: Tuple[int, int],
@@ -136,7 +135,7 @@ def make_grid(imgs, infos):
             pad_width,
             cv2.BORDER_CONSTANT,
             value=(255, 255, 255))
-        texts.append(f'{"execution: "}{i}\n{names[i]}\n{ori_shapes[i]}')
+        texts.append(f'execution: {i}\n{names[i]}\n{ori_shapes[i]}')
         text_positions.append(
             [start_x + img.shape[1] // 2 + pad_width, max_height])
         start_x += img.shape[1] + horizontal_gap
@@ -172,7 +171,7 @@ class InspectCompose(Compose):
             data = t(data)
             # Keep the same meta_keys in the PackTextDetInputs
             # or PackTextRecogInputs
-            self.transforms[-1].meta_keys = [key for key in data]
+            self.transforms[-1].meta_keys = list(data)
             data_sample = self.transforms[-1](data)
             if data is None:
                 return None
@@ -297,25 +296,21 @@ def obtain_dataset_cfg(cfg: Config, phase: str, mode: str, task: str) -> Tuple:
             # which LoadImageFromFile can not handle
             if dataset.pipeline is not None:
                 all_transform_types = [tfm['type'] for tfm in dataset.pipeline]
-                if any([
-                        tfm_type.startswith('LoadImageFrom')
-                        for tfm_type in all_transform_types
-                ]):
+                if any(
+                    tfm_type.startswith('LoadImageFrom')
+                    for tfm_type in all_transform_types
+                ):
                     for tfm in dataset.pipeline:
                         if tfm['type'].startswith('LoadImageFrom'):
                             # update LoadImageFrom** transform
                             default_cfg['pipeline'][0] = tfm
             dataset.pipeline = default_cfg['pipeline']
-        else:
-            # In test_pipeline LoadOCRAnnotations is placed behind
-            # other transforms. Transform will not be applied on
-            # gt annotation.
-            if phase == 'test':
-                all_transform_types = [tfm['type'] for tfm in dataset.pipeline]
-                load_ocr_ann_tfm_index = all_transform_types.index(
-                    'LoadOCRAnnotations')
-                load_ocr_ann_tfm = dataset.pipeline.pop(load_ocr_ann_tfm_index)
-                dataset.pipeline.insert(1, load_ocr_ann_tfm)
+        elif phase == 'test':
+            all_transform_types = [tfm['type'] for tfm in dataset.pipeline]
+            load_ocr_ann_tfm_index = all_transform_types.index(
+                'LoadOCRAnnotations')
+            load_ocr_ann_tfm = dataset.pipeline.pop(load_ocr_ann_tfm_index)
+            dataset.pipeline.insert(1, load_ocr_ann_tfm)
 
         return dataset, visualizer
 

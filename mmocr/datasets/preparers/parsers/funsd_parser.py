@@ -19,10 +19,10 @@ class FUNSDTextDetAnnParser(BaseParser):
 
     def parse_file(self, img_path: str, ann_path: str) -> Tuple:
         """Parse single annotation."""
-        instances = list()
-        for poly, text, ignore in self.loader(ann_path):
-            instances.append(dict(poly=poly, text=text, ignore=ignore))
-
+        instances = [
+            dict(poly=poly, text=text, ignore=ignore)
+            for poly, text, ignore in self.loader(ann_path)
+        ]
         return img_path, instances
 
     def loader(self, file_path: str):

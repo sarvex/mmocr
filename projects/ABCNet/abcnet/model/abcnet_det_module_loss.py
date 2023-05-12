@@ -56,10 +56,7 @@ class ABCNetDetModuleLoss(BaseTextDetModuleLoss):
         self.loss_bezier = MODELS.build(loss_bezier)
         self.bbox_coder = TASK_UTILS.build(bbox_coder)
         use_sigmoid_cls = loss_cls.get('use_sigmoid', False)
-        if use_sigmoid_cls:
-            self.cls_out_channels = num_classes
-        else:
-            self.cls_out_channels = num_classes + 1
+        self.cls_out_channels = num_classes if use_sigmoid_cls else num_classes + 1
 
     def forward(self, inputs: Tuple[Tensor],
                 data_samples: DetSampleList) -> Dict:

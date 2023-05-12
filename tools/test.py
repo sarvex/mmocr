@@ -57,24 +57,23 @@ def parse_args():
 
 def trigger_visualization_hook(cfg, args):
     default_hooks = cfg.default_hooks
-    if 'visualization' in default_hooks:
-        visualization_hook = default_hooks['visualization']
-        # Turn on visualization
-        visualization_hook['enable'] = True
-        visualization_hook['draw_gt'] = True
-        visualization_hook['draw_pred'] = True
-        if args.show:
-            visualization_hook['show'] = True
-            visualization_hook['wait_time'] = args.wait_time
-        if args.show_dir:
-            cfg.visualizer['save_dir'] = args.show_dir
-            cfg.visualizer['vis_backends'] = [dict(type='LocalVisBackend')]
-    else:
+    if 'visualization' not in default_hooks:
         raise RuntimeError(
             'VisualizationHook must be included in default_hooks.'
             'refer to usage '
             '"visualization=dict(type=\'VisualizationHook\')"')
 
+    visualization_hook = default_hooks['visualization']
+    # Turn on visualization
+    visualization_hook['enable'] = True
+    visualization_hook['draw_gt'] = True
+    visualization_hook['draw_pred'] = True
+    if args.show:
+        visualization_hook['show'] = True
+        visualization_hook['wait_time'] = args.wait_time
+    if args.show_dir:
+        cfg.visualizer['save_dir'] = args.show_dir
+        cfg.visualizer['vis_backends'] = [dict(type='LocalVisBackend')]
     return cfg
 
 
@@ -125,14 +124,7 @@ def main():
             cfg.test_evaluator = [cfg.test_evaluator, dump_metric]
 
     # build the runner from config
-    if 'runner_type' not in cfg:
-        # build the default runner
-        runner = Runner.from_cfg(cfg)
-    else:
-        # build customized runner from the registry
-        # if 'runner_type' is set in the cfg
-        runner = RUNNERS.build(cfg)
-
+    runner = RUNNERS.build(cfg) if 'runner_type' in cfg else Runner.from_cfg(cfg)
     # start testing
     runner.test()
 

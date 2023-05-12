@@ -65,7 +65,7 @@ class SynthTextAnnParser(BaseParser):
         assert is_type_list(char_boxes, np.ndarray)
 
         # from top left to to right
-        p_top = [box[0:2] for box in char_boxes]
+        p_top = [box[:2] for box in char_boxes]
         # from bottom right to bottom left
         p_bottom = [
             char_boxes[idx][[2, 3], :]
@@ -74,9 +74,7 @@ class SynthTextAnnParser(BaseParser):
 
         p = p_top + p_bottom
 
-        boundary = np.concatenate(p).astype(int)
-
-        return boundary
+        return np.concatenate(p).astype(int)
 
     def _match_bbox_char_str(self, bboxes: np.ndarray, char_bboxes: np.ndarray,
                              strs: np.ndarray
@@ -152,21 +150,26 @@ class SynthTextAnnParser(BaseParser):
         assert isinstance(ann_paths, str)
         gt = loadmat(ann_paths)
         self.img_dir = img_paths
-        samples = track_parallel_progress(
+        return track_parallel_progress(
             self.parse_file,
             list(
-                zip(gt['imnames'][0], gt['wordBB'][0], gt['charBB'][0],
-                    gt['txt'][0])),
-            nproc=self.nproc)
-        return samples
+                zip(
+                    gt['imnames'][0],
+                    gt['wordBB'][0],
+                    gt['charBB'][0],
+                    gt['txt'][0],
+                )
+            ),
+            nproc=self.nproc,
+        )
 
     def parse_file(self, annotation: Tuple) -> Tuple:
         """Parse single annotation."""
         img_file, wordBB, charBB, txt = annotation
         polys_list, word_list = self._match_bbox_char_str(wordBB, charBB, txt)
 
-        instances = list()
-        for poly, word in zip(polys_list, word_list):
-            instances.append(
-                dict(poly=poly.flatten().tolist(), text=word, ignore=False))
+        instances = [
+            dict(poly=poly.flatten().tolist(), text=word, ignore=False)
+            for poly, word in zip(polys_list, word_list)
+        ]
         return osp.join(self.img_dir, img_file[0]), instances

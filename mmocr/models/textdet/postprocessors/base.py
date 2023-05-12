@@ -29,7 +29,7 @@ class BaseTextDetPostProcessor:
                  rescale_fields: Optional[Sequence[str]] = None,
                  train_cfg: Optional[Dict] = None,
                  test_cfg: Optional[Dict] = None) -> None:
-        assert text_repr_type in ['poly', 'quad']
+        assert text_repr_type in {'poly', 'quad'}
         assert rescale_fields is None or isinstance(rescale_fields, list)
         assert train_cfg is None or isinstance(train_cfg, dict)
         assert test_cfg is None or isinstance(test_cfg, dict)
@@ -61,9 +61,7 @@ class BaseTextDetPostProcessor:
             cfg = {}
         pred_results = self.split_results(pred_results)
         process_single = partial(self._process_single, **cfg)
-        results = list(map(process_single, pred_results, data_samples))
-
-        return results
+        return list(map(process_single, pred_results, data_samples))
 
     def _process_single(self, pred_result: Union[Tensor, List[Tensor]],
                         data_sample: TextDetDataSample,
@@ -185,9 +183,9 @@ class BaseTextDetPostProcessor:
         polygons = np.array(sorted(polygons, key=lambda x: x[-1]))
         keep_polys = []
         keep_scores = []
-        index = [i for i in range(len(polygons))]
+        index = list(range(len(polygons)))
 
-        while len(index) > 0:
+        while index:
             keep_polys.append(polygons[index[-1]][:-1].tolist())
             keep_scores.append(polygons[index[-1]][-1])
             A = polygons[index[-1]][:-1]

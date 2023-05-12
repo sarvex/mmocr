@@ -29,11 +29,10 @@ class TotaltextTextDetAnnParser(BaseParser):
 
     def parse_file(self, img_path: str, ann_path: str) -> Dict:
         """Convert single annotation."""
-        instances = list()
-        for poly, text in self.loader(ann_path):
-            instances.append(
-                dict(poly=poly, text=text, ignore=text == self.ignore))
-
+        instances = [
+            dict(poly=poly, text=text, ignore=text == self.ignore)
+            for poly, text in self.loader(ann_path)
+        ]
         return img_path, instances
 
     def loader(self, file_path: str) -> str:
@@ -77,7 +76,7 @@ class TotaltextTextDetAnnParser(BaseParser):
                 word = text[0]
                 if len(text) > 1:
                     for ann_word in text[1:]:
-                        word += ',' + ann_word
+                        word += f',{ann_word}'
                 text = str(eval(word))
 
             return poly, text
@@ -89,7 +88,7 @@ class TotaltextTextDetAnnParser(BaseParser):
                     tmp_line = line
                     continue
                 if not line.startswith('x:'):
-                    tmp_line += ' ' + line
+                    tmp_line += f' {line}'
                     continue
                 complete_line = tmp_line
                 tmp_line = line

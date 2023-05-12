@@ -112,14 +112,12 @@ class FCEModuleLoss(TextSnakeModuleLoss):
             else:
                 loss_reg_y += sum(loss)
 
-        results = dict(
+        return dict(
             loss_text=loss_tr,
             loss_center=loss_tcl,
             loss_reg_x=loss_reg_x,
             loss_reg_y=loss_reg_y,
         )
-
-        return results
 
     def forward_single(self, pred: torch.Tensor,
                        gt: torch.Tensor) -> Sequence[torch.Tensor]:
@@ -246,8 +244,8 @@ class FCEModuleLoss(TextSnakeModuleLoss):
 
         lv_size_divs = self.level_size_divisors
         lv_proportion_range = self.level_proportion_range
-        lv_text_polys = [[] for i in range(len(lv_size_divs))]
-        lv_ignore_polys = [[] for i in range(len(lv_size_divs))]
+        lv_text_polys = [[] for _ in range(len(lv_size_divs))]
+        lv_ignore_polys = [[] for _ in range(len(lv_size_divs))]
         level_maps = []
 
         for poly_ind, poly in enumerate(text_polys):
@@ -264,13 +262,11 @@ class FCEModuleLoss(TextSnakeModuleLoss):
                         lv_text_polys[ind].append(poly[0] / lv_size_divs[ind])
 
         for ind, size_divisor in enumerate(lv_size_divs):
-            current_level_maps = []
             level_img_size = (h // size_divisor, w // size_divisor)
 
             text_region = self._generate_text_region_mask(
                 level_img_size, lv_text_polys[ind])[None]
-            current_level_maps.append(text_region)
-
+            current_level_maps = [text_region]
             center_region = self._generate_center_region_mask(
                 level_img_size, lv_text_polys[ind])[None]
             current_level_maps.append(center_region)
@@ -281,9 +277,7 @@ class FCEModuleLoss(TextSnakeModuleLoss):
 
             fourier_real_map, fourier_image_maps = self._generate_fourier_maps(
                 level_img_size, lv_text_polys[ind])
-            current_level_maps.append(fourier_real_map)
-            current_level_maps.append(fourier_image_maps)
-
+            current_level_maps.extend((fourier_real_map, fourier_image_maps))
             level_maps.append(np.concatenate(current_level_maps))
 
         return level_maps
@@ -411,9 +405,7 @@ class FCEModuleLoss(TextSnakeModuleLoss):
 
         real_part = np.real(fourier_coeff).reshape((-1, 1))
         image_part = np.imag(fourier_coeff).reshape((-1, 1))
-        fourier_signature = np.hstack([real_part, image_part])
-
-        return fourier_signature
+        return np.hstack([real_part, image_part])
 
     def _resample_polygon(self,
                           polygon: ArrayLike,
@@ -430,10 +422,7 @@ class FCEModuleLoss(TextSnakeModuleLoss):
 
         for i in range(len(polygon)):
             p1 = polygon[i]
-            if i == len(polygon) - 1:
-                p2 = polygon[0]
-            else:
-                p2 = polygon[i + 1]
+            p2 = polygon[0] if i == len(polygon) - 1 else polygon[i + 1]
             length.append(((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)**0.5)
 
         total_length = sum(length)
@@ -444,11 +433,7 @@ class FCEModuleLoss(TextSnakeModuleLoss):
         for i in range(len(polygon)):
             num = n_on_each_line[i]
             p1 = polygon[i]
-            if i == len(polygon) - 1:
-                p2 = polygon[0]
-            else:
-                p2 = polygon[i + 1]
-
+            p2 = polygon[0] if i == len(polygon) - 1 else polygon[i + 1]
             if num == 0:
                 continue
 
@@ -473,8 +458,7 @@ class FCEModuleLoss(TextSnakeModuleLoss):
         index_x = np.argsort(x)
         index_y = np.argmin(y[index_x[:8]])
         index = index_x[index_y]
-        new_polygon = np.concatenate([polygon[index:], polygon[:index]])
-        return new_polygon
+        return np.concatenate([polygon[index:], polygon[:index]])
 
     def _clockwise(self, fourier_coeff: np.ndarray,
                    fourier_degree: int) -> np.ndarray:
@@ -513,8 +497,7 @@ class FCEModuleLoss(TextSnakeModuleLoss):
         """
         points = polygon[:, 0] + polygon[:, 1] * 1j
         c_fft = fft(points) / len(points)
-        c = np.hstack((c_fft[-fourier_degree:], c_fft[:fourier_degree + 1]))
-        return c
+        return np.hstack((c_fft[-fourier_degree:], c_fft[:fourier_degree + 1]))
 
     def _fourier2poly(self, real_maps: torch.Tensor,
                       imag_maps: torch.Tensor) -> Sequence[torch.Tensor]:

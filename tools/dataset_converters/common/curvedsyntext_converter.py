@@ -65,8 +65,7 @@ def parse_args():
         help='Number of sample points at each Bezier curve.')
     parser.add_argument(
         '--nproc', default=1, type=int, help='Number of processes')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def convert_annotations(data,

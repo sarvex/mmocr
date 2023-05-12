@@ -25,7 +25,7 @@ class BaseWeightList:
     metric_name: str
 
     def __init__(self):
-        data = (d + f' ({self.metric_name})' for d in self.dataset_list)
+        data = (f'{d} ({self.metric_name})' for d in self.dataset_list)
         self.table_header = ['模型', 'README', *data]
 
     def _get_model_info(self, task_name: str):

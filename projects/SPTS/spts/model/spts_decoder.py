@@ -221,8 +221,11 @@ class SPTSDecoder(BaseDecoder):
             float(0.0).
         """
         mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)
-        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(
-            mask == 1, float(0.0))
+        mask = (
+            mask.float()
+            .masked_fill(mask == 0, float('-inf'))
+            .masked_fill(mask == 1, 0.0)
+        )
         return mask
 
     def _gen_mask(self, out_enc, data_samples):
@@ -525,7 +528,7 @@ class TransformerDecoderLayer(nn.Module):
 
 
 def _get_clones(module, N):
-    return nn.ModuleList([copy.deepcopy(module) for i in range(N)])
+    return nn.ModuleList([copy.deepcopy(module) for _ in range(N)])
 
 
 def _get_activation_fn(activation):

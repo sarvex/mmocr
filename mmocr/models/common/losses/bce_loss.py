@@ -30,7 +30,7 @@ class MaskedBalancedBCEWithLogitsLoss(nn.Module):
                  fallback_negative_num: int = 0,
                  eps: float = 1e-6) -> None:
         super().__init__()
-        assert reduction in ['none', 'mean', 'sum']
+        assert reduction in {'none', 'mean', 'sum'}
         assert isinstance(negative_ratio, (float, int))
         assert isinstance(fallback_negative_num, int)
         assert isinstance(eps, float)
@@ -81,10 +81,9 @@ class MaskedBalancedBCEWithLogitsLoss(nn.Module):
 
         negative_loss, _ = torch.topk(negative_loss.view(-1), negative_count)
 
-        balance_loss = (positive_loss.sum() + negative_loss.sum()) / (
-            positive_count + negative_count + self.eps)
-
-        return balance_loss
+        return (positive_loss.sum() + negative_loss.sum()) / (
+            positive_count + negative_count + self.eps
+        )
 
 
 @MODELS.register_module()
@@ -109,7 +108,7 @@ class MaskedBalancedBCELoss(MaskedBalancedBCEWithLogitsLoss):
                  fallback_negative_num: int = 0,
                  eps: float = 1e-6) -> None:
         super().__init__()
-        assert reduction in ['none', 'mean', 'sum']
+        assert reduction in {'none', 'mean', 'sum'}
         assert isinstance(negative_ratio, (float, int))
         assert isinstance(fallback_negative_num, int)
         assert isinstance(eps, float)

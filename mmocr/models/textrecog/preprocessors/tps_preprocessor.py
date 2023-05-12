@@ -103,8 +103,7 @@ class TPStransform(nn.Module):
                                       self.target_width, 2)
         grid = torch.clamp(grid, 0, 1)
         grid = 2.0 * grid - 1.0
-        output_maps = self._grid_sample(input, grid, canvas=None)
-        return output_maps
+        return self._grid_sample(input, grid, canvas=None)
 
     def _grid_sample(self,
                      input: torch.Tensor,
@@ -122,11 +121,9 @@ class TPStransform(nn.Module):
         output = F.grid_sample(input, grid, align_corners=True)
         if canvas is None:
             return output
-        else:
-            input_mask = input.data.new(input.size()).fill_(1)
-            output_mask = F.grid_sample(input_mask, grid, align_corners=True)
-            padded_output = output * output_mask + canvas * (1 - output_mask)
-            return padded_output
+        input_mask = input.data.new(input.size()).fill_(1)
+        output_mask = F.grid_sample(input_mask, grid, align_corners=True)
+        return output * output_mask + canvas * (1 - output_mask)
 
     def _compute_partial_repr(self, input_points: torch.Tensor,
                               control_points: torch.Tensor) -> torch.Tensor:
@@ -175,8 +172,7 @@ class TPStransform(nn.Module):
         ctrl_pts_bottom = np.stack([ctrl_pts_x, ctrl_pts_y_bottom], axis=1)
         output_ctrl_pts_arr = np.concatenate([ctrl_pts_top, ctrl_pts_bottom],
                                              axis=0)
-        output_ctrl_pts = torch.Tensor(output_ctrl_pts_arr)
-        return output_ctrl_pts
+        return torch.Tensor(output_ctrl_pts_arr)
 
 
 @MODELS.register_module()
@@ -268,5 +264,4 @@ class STN(BasePreprocessor):
         points = self.stn_fc2(0.1 * img_feat)
         points = points.view(-1, self.num_control_points, 2)
 
-        transformd_image = self.tps(img, points)
-        return transformd_image
+        return self.tps(img, points)

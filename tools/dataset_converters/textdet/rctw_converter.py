@@ -63,13 +63,11 @@ def collect_annotations(files, nproc=1):
     assert isinstance(files, list)
     assert isinstance(nproc, int)
 
-    if nproc > 1:
-        images = mmengine.track_parallel_progress(
-            load_img_info, files, nproc=nproc)
-    else:
-        images = mmengine.track_progress(load_img_info, files)
-
-    return images
+    return (
+        mmengine.track_parallel_progress(load_img_info, files, nproc=nproc)
+        if nproc > 1
+        else mmengine.track_progress(load_img_info, files)
+    )
 
 
 def load_img_info(files):
@@ -124,21 +122,17 @@ def load_txt_info(gt_file, img_info):
     with open(gt_file, encoding='utf-8-sig') as f:
         lines = f.readlines()
     for line in lines:
-        points = line.split(',')[0:8]
+        points = line.split(',')[:8]
         word = line.split(',')[9].rstrip('\n').strip('"')
         difficult = 1 if line.split(',')[8] != '0' else 0
         segmentation = [int(pt) for pt in points]
-        x = max(0, min(segmentation[0::2]))
+        x = max(0, min(segmentation[::2]))
         y = max(0, min(segmentation[1::2]))
-        w = abs(max(segmentation[0::2]) - x)
+        w = abs(max(segmentation[::2]) - x)
         h = abs(max(segmentation[1::2]) - y)
         bbox = [x, y, w, h]
 
-        if word == '###' or difficult == 1:
-            iscrowd = 1
-        else:
-            iscrowd = 0
-
+        iscrowd = 1 if word == '###' or difficult == 1 else 0
         anno = dict(
             iscrowd=iscrowd,
             category_id=1,
@@ -160,8 +154,7 @@ def parse_args():
         '--val-ratio', help='Split ratio for val set', default=0.0, type=float)
     parser.add_argument(
         '--nproc', default=1, type=int, help='Number of process')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():

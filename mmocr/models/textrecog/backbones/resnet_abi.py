@@ -70,24 +70,25 @@ class ResNetABI(BaseModule):
             self.res_layers.append(layer_name)
 
     def _make_layer(self, block, inplanes, planes, blocks, stride=1):
-        layers = []
         downsample = None
         if stride != 1 or inplanes != planes:
             downsample = nn.Sequential(
                 nn.Conv2d(inplanes, planes, 1, stride, bias=False),
                 nn.BatchNorm2d(planes),
             )
-        layers.append(
+        layers = [
             block(
                 inplanes,
                 planes,
                 use_conv1x1=True,
                 stride=stride,
-                downsample=downsample))
+                downsample=downsample,
+            )
+        ]
         inplanes = planes
-        for _ in range(1, blocks):
-            layers.append(block(inplanes, planes, use_conv1x1=True))
-
+        layers.extend(
+            block(inplanes, planes, use_conv1x1=True) for _ in range(1, blocks)
+        )
         return Sequential(*layers)
 
     def _make_stem_layer(self, in_channels, stem_channels):

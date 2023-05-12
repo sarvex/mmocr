@@ -79,13 +79,12 @@ class CRNNDecoder(BaseDecoder):
             x = feat.squeeze(2)  # [N, C, W]
             x = x.permute(2, 0, 1)  # [W, N, C]
             x = self.decoder(x)  # [W, N, C]
-            outputs = x.permute(1, 0, 2).contiguous()
+            return x.permute(1, 0, 2).contiguous()
         else:
             x = self.decoder(feat)
             x = x.permute(0, 3, 1, 2).contiguous()
             n, w, c, h = x.size()
-            outputs = x.view(n, w, c * h)
-        return outputs
+            return x.view(n, w, c * h)
 
     def forward_test(
         self,

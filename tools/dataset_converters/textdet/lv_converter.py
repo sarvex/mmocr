@@ -59,13 +59,11 @@ def collect_annotations(files, nproc=1):
     assert isinstance(files, list)
     assert isinstance(nproc, int)
 
-    if nproc > 1:
-        images = mmengine.track_parallel_progress(
-            load_img_info, files, nproc=nproc)
-    else:
-        images = mmengine.track_progress(load_img_info, files)
-
-    return images
+    return (
+        mmengine.track_parallel_progress(load_img_info, files, nproc=nproc)
+        if nproc > 1
+        else mmengine.track_progress(load_img_info, files)
+    )
 
 
 def load_img_info(files):
@@ -159,8 +157,7 @@ def parse_args():
     parser.add_argument('root_path', help='Root dir path of Lecture Video DB')
     parser.add_argument(
         '--nproc', default=1, type=int, help='number of process')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():
@@ -170,12 +167,14 @@ def main():
     for split in ['train', 'val', 'test']:
         print(f'Processing {split} set...')
         with mmengine.Timer(
-                print_tmpl='It takes {}s to convert LV annotation'):
+                        print_tmpl='It takes {}s to convert LV annotation'):
             files = collect_files(osp.join(root_path, 'imgs', split))
             image_infos = collect_annotations(files, nproc=args.nproc)
-            dump_ocr_data(image_infos,
-                          osp.join(root_path, 'instances_' + split + '.json'),
-                          'textdet')
+            dump_ocr_data(
+                image_infos,
+                osp.join(root_path, f'instances_{split}.json'),
+                'textdet',
+            )
 
 
 if __name__ == '__main__':

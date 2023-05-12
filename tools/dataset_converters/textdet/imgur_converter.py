@@ -14,9 +14,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Generate training, validation and test set of IMGUR ')
     parser.add_argument('root_path', help='Root dir path of IMGUR')
-    args = parser.parse_args()
-
-    return args
+    return parser.parse_args()
 
 
 def collect_imgur_info(root_path, annotation_filename, print_every=1000):
@@ -33,7 +31,7 @@ def collect_imgur_info(root_path, annotation_filename, print_every=1000):
         if i >= 0 and i % print_every == 0:
             print(f'{i}/{len(images)}')
 
-        img_path = osp.join(root_path, 'imgs', img_name + '.jpg')
+        img_path = osp.join(root_path, 'imgs', f'{img_name}.jpg')
 
         # Skip not exist images
         if not osp.exists(img_path):
@@ -46,9 +44,10 @@ def collect_imgur_info(root_path, annotation_filename, print_every=1000):
             continue
 
         img_info = dict(
-            file_name=img_name + '.jpg',
+            file_name=f'{img_name}.jpg',
             height=img.shape[0],
-            width=img.shape[1])
+            width=img.shape[1],
+        )
 
         anno_info = []
         for ann_id in annotation['index_to_ann_map'][img_name]:
@@ -120,9 +119,6 @@ def get_best_begin_point_single(coordinate):
         if temp_force < force:
             force = temp_force
             force_flag = i
-    if force_flag != 0:
-        pass
-
     return np.array(combine[force_flag]).reshape(8)
 
 

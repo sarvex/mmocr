@@ -20,8 +20,7 @@ def parse_args():
         '--preserve-vertical',
         help='Preserve samples containing vertical texts',
         action='store_true')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def process_img(args, src_image_root, dst_image_root, ignore_image_root,

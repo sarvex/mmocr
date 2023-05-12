@@ -32,11 +32,9 @@ class TestDRRG(unittest.TestCase):
         angle = (np.random.random_sample((num_rois, 1)) * 2 - 1) * np.pi / 2
         cos, sin = np.cos(angle), np.sin(angle)
         comp_labels = np.random.randint(1, 3, (num_rois, 1))
-        num_rois = num_rois * np.ones((num_rois, 1))
+        num_rois *= np.ones((num_rois, 1))
         comp_attribs = np.hstack([num_rois, x, y, h, w, cos, sin, comp_labels])
-        gt_comp_attribs = np.expand_dims(
-            comp_attribs.astype(np.float32), axis=0)
-        return gt_comp_attribs
+        return np.expand_dims(comp_attribs.astype(np.float32), axis=0)
 
     def _get_drrg_inputs(self):
         imgs = self.inputs['imgs']
@@ -112,8 +110,7 @@ class TestDRRG(unittest.TestCase):
         """Load a configuration as a python module."""
         config_dpath = self._get_config_directory()
         config_fpath = join(config_dpath, fname)
-        config_mod = Config.fromfile(config_fpath)
-        return config_mod
+        return Config.fromfile(config_fpath)
 
     def _get_detector_cfg(self, fname: str) -> 'ConfigDict':
         """Grab necessary configs necessary to create a detector.

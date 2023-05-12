@@ -17,7 +17,7 @@ class CoordinateHead(BaseModule):
                  init_cfg=None):
         super().__init__(init_cfg=init_cfg)
 
-        mask_convs = list()
+        mask_convs = []
         for i in range(conv_num):
             if i == 0:
                 mask_conv = ConvModule(
@@ -39,7 +39,7 @@ class CoordinateHead(BaseModule):
         self.mask_convs = nn.Sequential(*mask_convs)
 
     def forward(self, features):
-        coord_features = list()
+        coord_features = []
         for feature in features:
             x_range = torch.linspace(
                 -1, 1, feature.shape[-1], device=feature.device)

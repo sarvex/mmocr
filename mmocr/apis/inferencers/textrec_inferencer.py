@@ -37,8 +37,7 @@ class TextRecInferencer(BaseMMOCRInferencer):
         Returns:
             dict: The output dictionary.
         """
-        result = {}
-        result['text'] = data_sample.pred_text.item
+        result = {'text': data_sample.pred_text.item}
         score = self._array2list(data_sample.pred_text.score)
         result['scores'] = float(np.mean(score))
         return result

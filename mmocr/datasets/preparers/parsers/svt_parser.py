@@ -20,12 +20,10 @@ class SVTTextDetAnnParser(BaseParser):
     def parse_files(self, img_dir: str, ann_path: str) -> List:
         """Parse annotations."""
         assert isinstance(ann_path, str)
-        samples = list()
-        for img_name, instance in self.loader(ann_path):
-            samples.append((osp.join(img_dir,
-                                     osp.basename(img_name)), instance))
-
-        return samples
+        return [
+            (osp.join(img_dir, osp.basename(img_name)), instance)
+            for img_name, instance in self.loader(ann_path)
+        ]
 
     def loader(self, file_path: str) -> Tuple[str, List]:
         """Load annotation from SVT xml format file. See annotation example in
@@ -44,7 +42,7 @@ class SVTTextDetAnnParser(BaseParser):
         root = tree.getroot()
         for image in root.findall('image'):
             image_name = image.find('imageName').text
-            instances = list()
+            instances = []
             for rectangle in image.find('taggedRectangles'):
                 x = int(rectangle.get('x'))
                 y = int(rectangle.get('y'))

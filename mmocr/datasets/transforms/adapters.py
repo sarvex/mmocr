@@ -39,7 +39,6 @@ class MMDet2MMOCR(BaseTransform):
                 # PolygonMasks
                 if isinstance(gt_masks[0], PolygonMasks):
                     gt_polygons = [mask[0] for mask in gt_masks.masks]
-                # BitmapMasks
                 else:
                     polygons = []
                     for mask in gt_masks.masks:
@@ -47,13 +46,7 @@ class MMDet2MMOCR(BaseTransform):
                         polygons += [
                             contour.reshape(-1) for contour in contours
                         ]
-                    # filter invalid polygons
-                    gt_polygons = []
-                    for polygon in polygons:
-                        if len(polygon) < 6:
-                            continue
-                        gt_polygons.append(polygon)
-
+                    gt_polygons = [polygon for polygon in polygons if len(polygon) >= 6]
             results['gt_polygons'] = gt_polygons
         # gt_ignore_flags -> gt_ignored
         if 'gt_ignore_flags' in results.keys():
@@ -63,8 +56,7 @@ class MMDet2MMOCR(BaseTransform):
         return results
 
     def __repr__(self) -> str:
-        repr_str = self.__class__.__name__
-        return repr_str
+        return self.__class__.__name__
 
 
 @TRANSFORMS.register_module()

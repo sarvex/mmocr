@@ -62,8 +62,8 @@ class GCAModule(nn.Module):
                  **kwargs) -> None:
         super().__init__()
 
-        assert pooling_type in ['avg', 'att']
-        assert fusion_type in ['channel_add', 'channel_mul', 'channel_concat']
+        assert pooling_type in {'avg', 'att'}
+        assert fusion_type in {'channel_add', 'channel_mul', 'channel_concat'}
 
         # in_channels must be divided by headers evenly
         assert in_channels % n_head == 0 and in_channels >= 8
@@ -75,7 +75,7 @@ class GCAModule(nn.Module):
         self.pooling_type = pooling_type
         self.fusion_type = fusion_type
         self.scale_attn = scale_attn
-        self.single_header_inplanes = int(in_channels / n_head)
+        self.single_header_inplanes = in_channels // n_head
 
         if pooling_type == 'att':
             self.conv_mask = nn.Conv2d(

@@ -179,18 +179,8 @@ class ABCNetDetHead(BaseTextDetHead):
             centerness = self.conv_centerness(cls_feat)
         # scale the bbox_pred of different level
         # float to avoid overflow when enabling FP16
-        if self.use_scale:
-            bbox_pred = scale(bbox_pred).float()
-        else:
-            bbox_pred = bbox_pred.float()
-        if self.norm_on_bbox:
-            # bbox_pred needed for gradient computation has been modified
-            # by F.relu(bbox_pred) when run with PyTorch 1.10. So replace
-            # F.relu(bbox_pred) with bbox_pred.clamp(min=0)
-            bbox_pred = bbox_pred.clamp(min=0)
-        else:
-            bbox_pred = bbox_pred.exp()
-
+        bbox_pred = scale(bbox_pred).float() if self.use_scale else bbox_pred.float()
+        bbox_pred = bbox_pred.clamp(min=0) if self.norm_on_bbox else bbox_pred.exp()
         if self.with_bezier:
             return cls_score, bbox_pred, centerness, bezier_pred
         else:

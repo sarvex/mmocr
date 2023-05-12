@@ -158,10 +158,7 @@ class PositionAttentionDecoder(BaseDecoder):
         attn_out = attn_out.permute(0, 2,
                                     1).contiguous()  # [n, max_seq_len, dim_v]
 
-        if self.return_feature:
-            return attn_out
-
-        return self.prediction(attn_out)
+        return attn_out if self.return_feature else self.prediction(attn_out)
 
     def forward_test(self, feat: torch.Tensor, out_enc: torch.Tensor,
                      img_metas: Sequence[TextRecogDataSample]) -> torch.Tensor:

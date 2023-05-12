@@ -77,14 +77,16 @@ class DBHead(BaseTextDetHead):
                   bias: bool = False) -> nn.ModuleList:
         """Initialize threshold branch."""
         in_channels = inner_channels
-        seq = Sequential(
-            nn.Conv2d(
-                in_channels, inner_channels // 4, 3, padding=1, bias=bias),
-            nn.BatchNorm2d(inner_channels // 4), nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(inner_channels // 4, inner_channels // 4, 2, 2),
-            nn.BatchNorm2d(inner_channels // 4), nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(inner_channels // 4, 1, 2, 2), nn.Sigmoid())
-        return seq
+        return Sequential(
+            nn.Conv2d(in_channels, in_channels // 4, 3, padding=1, bias=bias),
+            nn.BatchNorm2d(in_channels // 4),
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(in_channels // 4, in_channels // 4, 2, 2),
+            nn.BatchNorm2d(in_channels // 4),
+            nn.ReLU(inplace=True),
+            nn.ConvTranspose2d(in_channels // 4, 1, 2, 2),
+            nn.Sigmoid(),
+        )
 
     def forward(self,
                 img: Tensor,
@@ -136,8 +138,7 @@ class DBHead(BaseTextDetHead):
             dict: A dictionary of loss components.
         """
         outs = self(x, batch_data_samples, mode='loss')
-        losses = self.module_loss(outs, batch_data_samples)
-        return losses
+        return self.module_loss(outs, batch_data_samples)
 
     def loss_and_predict(self, x: Tuple[Tensor],
                          batch_data_samples: DetSampleList
@@ -180,5 +181,4 @@ class DBHead(BaseTextDetHead):
             after the post process.
         """
         outs = self(x, batch_data_samples, mode='predict')
-        predictions = self.postprocessor(outs, batch_data_samples)
-        return predictions
+        return self.postprocessor(outs, batch_data_samples)

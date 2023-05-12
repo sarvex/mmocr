@@ -9,8 +9,7 @@ dataset_zoo_path = '../../dataset_zoo'
 datasets = os.listdir(dataset_zoo_path)
 datasets.sort()
 
-table = '# 支持数据集一览\n'
-table += '## 支持的数据集\n'
+table = '# 支持数据集一览\n' + '## 支持的数据集\n'
 table += '| 数据集名称 | 文本检测 | 文本识别 | 端到端文本检测识别 | 关键信息抽取 |\n' \
          '|----------|---------|--------|------------------|-----------|\n'
 details = '## 数据集详情\n'
@@ -24,28 +23,19 @@ for dataset in datasets:
     paper = meta['Paper']
     data = meta['Data']
 
-    table += '| [{}](#{}) | {} | {} | {} | {} |\n'.format(
-        dataset,
-        detail_link,
-        '✓' if 'textdet' in data['Tasks'] else '',
-        '✓' if 'textrecog' in data['Tasks'] else '',
-        '✓' if 'textspotting' in data['Tasks'] else '',
-        '✓' if 'kie' in data['Tasks'] else '',
-    )
+    table += f"| [{dataset}](#{detail_link}) | {'✓' if 'textdet' in data['Tasks'] else ''} | {'✓' if 'textrecog' in data['Tasks'] else ''} | {'✓' if 'textspotting' in data['Tasks'] else ''} | {'✓' if 'kie' in data['Tasks'] else ''} |\n"
 
-    details += '### {}\n'.format(dataset_name)
-    details += "> \"{}\", *{}*, {}. [PDF]({})\n\n".format(
-        paper['Title'], paper['Venue'], paper['Year'], paper['URL'])
+    details += f'### {dataset_name}\n'
+    details += f"""> \"{paper['Title']}\", *{paper['Venue']}*, {paper['Year']}. [PDF]({paper['URL']})\n\n"""
     # Basic Info
     details += 'A. 数据集基础信息\n'
-    details += ' - 官方网址: [{}]({})\n'.format(dataset, data['Website'])
-    details += ' - 发布年份: {}\n'.format(paper['Year'])
-    details += ' - 语言: {}\n'.format(data['Language'])
-    details += ' - 场景: {}\n'.format(data['Scene'])
-    details += ' - 标注粒度: {}\n'.format(data['Granularity'])
-    details += ' - 支持任务: {}\n'.format(data['Tasks'])
-    details += ' - 数据集许可证: [{}]({})\n\n'.format(data['License']['Type'],
-                                                data['License']['Link'])
+    details += f" - 官方网址: [{dataset}]({data['Website']})\n"
+    details += f" - 发布年份: {paper['Year']}\n"
+    details += f" - 语言: {data['Language']}\n"
+    details += f" - 场景: {data['Scene']}\n"
+    details += f" - 标注粒度: {data['Granularity']}\n"
+    details += f" - 支持任务: {data['Tasks']}\n"
+    details += f" - 数据集许可证: [{data['License']['Type']}]({data['License']['Link']})\n\n"
 
     # Format
     details += '<details> <summary>B. 标注格式</summary>\n\n</br>'
@@ -59,7 +49,7 @@ for dataset in datasets:
 
     # Reference
     details += 'C. 参考文献\n'
-    details += '```bibtex\n{}\n```\n'.format(paper['BibTeX'])
+    details += f"```bibtex\n{paper['BibTeX']}\n```\n"
 
 datasetzoo = table + details
 

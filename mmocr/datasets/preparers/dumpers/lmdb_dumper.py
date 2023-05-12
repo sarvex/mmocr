@@ -58,9 +58,7 @@ class TextRecogLMDBDumper(BaseDumper):
         imageBuf = np.frombuffer(imageBin, dtype=np.uint8)
         img = cv2.imdecode(imageBuf, cv2.IMREAD_GRAYSCALE)
         imgH, imgW = img.shape[0], img.shape[1]
-        if imgH * imgW == 0:
-            return False
-        return True
+        return imgH * imgW != 0
 
     def write_cache(self, env, cache):
         with env.begin(write=True) as txn:
@@ -116,14 +114,13 @@ class TextRecogLMDBDumper(BaseDumper):
             img_name, text = self.parser_pack_instance(d)
             img_path = osp.join(self.data_root, img_name)
             if not osp.exists(img_path):
-                warnings.warn('%s does not exist' % img_path)
+                warnings.warn(f'{img_path} does not exist')
                 continue
             with open(img_path, 'rb') as f:
                 image_bin = f.read()
-            if self.verify:
-                if not self.check_image_is_valid(image_bin):
-                    warnings.warn('%s is not a valid image' % img_path)
-                    continue
+            if self.verify and not self.check_image_is_valid(image_bin):
+                warnings.warn(f'{img_path} is not a valid image')
+                continue
             image_key = 'image-%09d'.encode(self.encoding) % cnt
             cache.append((image_key, image_bin))
             cache.append((label_key, text.encode(self.encoding)))

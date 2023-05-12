@@ -18,8 +18,7 @@ def parse_args():
         nargs='+',
         default=[640, 640],
         help='input image size')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():

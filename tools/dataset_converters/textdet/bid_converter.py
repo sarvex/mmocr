@@ -50,13 +50,11 @@ def collect_annotations(files, nproc=1):
     assert isinstance(files, list)
     assert isinstance(nproc, int)
 
-    if nproc > 1:
-        images = mmengine.track_parallel_progress(
-            load_img_info, files, nproc=nproc)
-    else:
-        images = mmengine.track_progress(load_img_info, files)
-
-    return images
+    return (
+        mmengine.track_parallel_progress(load_img_info, files, nproc=nproc)
+        if nproc > 1
+        else mmengine.track_progress(load_img_info, files)
+    )
 
 
 def load_img_info(files):
@@ -111,10 +109,10 @@ def load_txt_info(gt_file, img_info):
         anno_info = []
         for line in f:
             line = line.strip('\n')
-            if line[0] == '[' or line[0] == 'x':
+            if line[0] in ['[', 'x']:
                 continue
             ann = line.split(',')
-            bbox = ann[0:4]
+            bbox = ann[:4]
             bbox = [int(coord) for coord in bbox]
             x, y, w, h = bbox
             segmentation = [x, y, x + w, y, x + w, y + h, x, y + h]
@@ -158,8 +156,7 @@ def parse_args():
         '--nproc', default=1, type=int, help='Number of processes')
     parser.add_argument(
         '--val-ratio', help='Split ratio for val set', default=0., type=float)
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():
@@ -176,9 +173,11 @@ def main():
             image_infos = [image_infos]
             splits = ['training']
         for i, split in enumerate(splits):
-            dump_ocr_data(image_infos[i],
-                          osp.join(root_path, 'instances_' + split + '.json'),
-                          'textdet')
+            dump_ocr_data(
+                image_infos[i],
+                osp.join(root_path, f'instances_{split}.json'),
+                'textdet',
+            )
 
 
 if __name__ == '__main__':

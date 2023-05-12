@@ -67,11 +67,7 @@ class SAREncoder(BaseEncoder):
             batch_first=True,
             dropout=rnn_dropout,
             bidirectional=enc_bi_rnn)
-        if enc_gru:
-            self.rnn_encoder = nn.GRU(**kwargs)
-        else:
-            self.rnn_encoder = nn.LSTM(**kwargs)
-
+        self.rnn_encoder = nn.GRU(**kwargs) if enc_gru else nn.LSTM(**kwargs)
         # global feature transformation
         encoder_rnn_out_size = d_enc * (int(enc_bi_rnn) + 1)
         self.linear = nn.Linear(encoder_rnn_out_size, encoder_rnn_out_size)

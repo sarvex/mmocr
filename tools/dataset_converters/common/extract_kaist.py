@@ -37,12 +37,13 @@ def extract(root_path):
                         if src_img:
                             shutil.move(
                                 src_ann,
-                                osp.join(root_path, 'annotations',
-                                         str(idx).zfill(5) + '.xml'))
-                            shutil.move(
-                                src_img,
-                                osp.join(root_path, 'imgs',
-                                         str(idx).zfill(5) + '.jpg'))
+                                osp.join(
+                                    root_path,
+                                    'annotations',
+                                    f'{str(idx).zfill(5)}.xml',
+                                ),
+                            )
+                            shutil.move(src_img, osp.join(root_path, 'imgs', f'{str(idx).zfill(5)}.jpg'))
                             idx += 1
 
 
@@ -58,8 +59,7 @@ def extract_zipfile(zip_path, dst_dir, delete=True):
 def parse_args():
     parser = argparse.ArgumentParser(description='Extract KAIST zips')
     parser.add_argument('root_path', help='Root path of KAIST')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():

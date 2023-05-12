@@ -34,8 +34,7 @@ class BaseParser:
         Returns:
             List: A list of a tuple of (image_path, instances)
         """
-        samples = self.parse_files(img_paths, ann_paths)
-        return samples
+        return self.parse_files(img_paths, ann_paths)
 
     def parse_files(self, img_paths: Union[List[str], str],
                     ann_paths: Union[List[str], str]) -> List[Tuple]:
@@ -59,9 +58,9 @@ class BaseParser:
               - 'text' (textspotting or textrecog)
               - 'ignore' (all task)
         """
-        samples = track_parallel_progress_multi_args(
-            self.parse_file, (img_paths, ann_paths), nproc=self.nproc)
-        return samples
+        return track_parallel_progress_multi_args(
+            self.parse_file, (img_paths, ann_paths), nproc=self.nproc
+        )
 
     @abstractmethod
     def parse_file(self, img_path: str, ann_path: str) -> Tuple:
@@ -115,7 +114,7 @@ class BaseParser:
         """
         keys = format.split(separator)
         with open(file_path, 'r', encoding=encoding) as f:
-            for line in f.readlines():
+            for line in f:
                 line = line.strip()
                 values = line.split(separator)
                 values = values[:len(keys) -

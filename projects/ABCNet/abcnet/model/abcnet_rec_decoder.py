@@ -76,9 +76,10 @@ class ABCNetRecDecoder(BaseDecoder):
             :math:`C` is ``num_classes``.
         """
         bs = out_enc.size()[1]
-        trg_seq = []
-        for target in data_samples:
-            trg_seq.append(target.gt_text.padded_indexes.to(feat.device))
+        trg_seq = [
+            target.gt_text.padded_indexes.to(feat.device)
+            for target in data_samples
+        ]
         decoder_input = torch.zeros(bs).long().to(out_enc.device)
         trg_seq = torch.stack(trg_seq, dim=0)
         decoder_hidden = torch.zeros(1, bs,
@@ -88,8 +89,7 @@ class ABCNetRecDecoder(BaseDecoder):
             #  decoder_output (nbatch, ncls)
             decoder_output, decoder_hidden = self._attention(
                 decoder_input, decoder_hidden, out_enc)
-            teach_forcing = True if random.random(
-            ) > self.teach_prob else False
+            teach_forcing = random.random( ) > self.teach_prob
             if teach_forcing:
                 decoder_input = trg_seq[:, index]  # Teacher forcing
             else:

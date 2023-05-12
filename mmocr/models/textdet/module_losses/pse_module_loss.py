@@ -49,11 +49,14 @@ class PSEModuleLoss(PANModuleLoss):
         max_shrink_dist: Union[int, float] = 20,
     ) -> None:
         super().__init__()
-        assert reduction in ['mean', 'sum'
-                             ], "reduction must be either of ['mean','sum']"
-        assert kernel_sample_type in [
-            'adaptive', 'hard'
-        ], "kernel_sample_type must be either of ['hard', 'adaptive']"
+        assert reduction in {
+            'mean',
+            'sum',
+        }, "reduction must be either of ['mean','sum']"
+        assert kernel_sample_type in {
+            'adaptive',
+            'hard',
+        }, "kernel_sample_type must be either of ['hard', 'adaptive']"
         self.weight_text = weight_text
         self.weight_kernel = weight_kernel
         self.ohem_ratio = ohem_ratio
@@ -77,8 +80,6 @@ class PSEModuleLoss(PANModuleLoss):
             dict: The dict for pse losses with loss_text, loss_kernel,
             loss_aggregation and loss_discrimination.
         """
-        losses = []
-
         gt_kernels, gt_masks = self.get_targets(data_samples)
         target_size = gt_kernels.size()[2:]
         preds = F.interpolate(preds, size=target_size, mode='bilinear')
@@ -95,8 +96,7 @@ class PSEModuleLoss(PANModuleLoss):
                                         gt_masks)
         loss_texts = self.loss_text(pred_texts.sigmoid(), gt_kernels[0],
                                     sampled_mask)
-        losses.append(self.weight_text * loss_texts)
-
+        losses = [self.weight_text * loss_texts]
         # compute kernel loss
         if self.kernel_sample_type == 'hard':
             sampled_masks_kernel = (gt_kernels[0] >
@@ -125,5 +125,4 @@ class PSEModuleLoss(PANModuleLoss):
         else:
             raise NotImplementedError
 
-        results = dict(loss_text=losses[0], loss_kernel=losses[1])
-        return results
+        return dict(loss_text=losses[0], loss_kernel=losses[1])

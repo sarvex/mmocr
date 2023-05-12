@@ -45,8 +45,8 @@ class PairGatherer(BaseGatherer):
         """tuple(list, list): The list of image paths and the list of
         annotation paths."""
 
-        img_list = list()
-        ann_list = list()
+        img_list = []
+        ann_list = []
         for img_path in list_files(self.img_dir, self.img_suffixes):
             if not re.match(self.rule[0], osp.basename(img_path)):
                 continue

@@ -51,9 +51,7 @@ class TextRecogPacker(BasePacker):
 
         img_name, text = sample
         img_name = osp.relpath(img_name, self.data_root)
-        packed_instance = dict(instances=[dict(text=text)], img_path=img_name)
-
-        return packed_instance
+        return dict(instances=[dict(text=text)], img_path=img_name)
 
     def add_meta(self, sample: List) -> Dict:
         """Add meta information to the sample.
@@ -64,14 +62,13 @@ class TextRecogPacker(BasePacker):
         Returns:
             Dict: A dict contains the meta information and samples.
         """
-        meta = {
+        return {
             'metainfo': {
                 'dataset_type': 'TextRecogDataset',
-                'task_name': 'textrecog'
+                'task_name': 'textrecog',
             },
-            'data_list': sample
+            'data_list': sample,
         }
-        return meta
 
 
 @DATA_PACKERS.register_module()

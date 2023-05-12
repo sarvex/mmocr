@@ -140,7 +140,7 @@ class PANPostprocessor(BaseTextDetPostProcessor):
             vertices = cv2.boxPoints(rect)
             boundary = []
             if min(rect[1]) >= min_width:
-                boundary = [p for p in vertices.flatten().tolist()]
+                boundary = list(vertices.flatten().tolist())
         elif self.text_repr_type == 'poly':
 
             height = np.max(points[:, 1]) + 10
@@ -153,7 +153,4 @@ class PANPostprocessor(BaseTextDetPostProcessor):
                                            cv2.CHAIN_APPROX_SIMPLE)
             boundary = list(contours[0].flatten().tolist())
 
-        if len(boundary) < 8:
-            return []
-
-        return boundary
+        return [] if len(boundary) < 8 else boundary

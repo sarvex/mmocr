@@ -42,8 +42,7 @@ def normalize_adjacent_matrix(mat: ndarray) -> ndarray:
     d_inv = np.power(d, -0.5).flatten()
     d_inv[np.isinf(d_inv)] = 0.0
     d_inv = np.diag(d_inv)
-    norm_mat = mat.dot(d_inv).transpose().dot(d_inv)
-    return norm_mat
+    return mat.dot(d_inv).transpose().dot(d_inv)
 
 
 def euclidean_distance_matrix(mat_a: ndarray, mat_b: ndarray) -> ndarray:
@@ -70,8 +69,7 @@ def euclidean_distance_matrix(mat_a: ndarray, mat_b: ndarray) -> ndarray:
 
     zero_mask = np.less(mat_d_squared, 0.0)
     mat_d_squared[zero_mask] = 0.0
-    mat_d = np.sqrt(mat_d_squared)
-    return mat_d
+    return np.sqrt(mat_d_squared)
 
 
 def feature_embedding(input_feats: ndarray, out_feat_len: int) -> ndarray:
@@ -1098,8 +1096,7 @@ class GraphConv(BaseModule):
 
         def forward(self, features: Tensor, A: Tensor) -> Tensor:
             """Forward function."""
-            x = torch.bmm(A, features)
-            return x
+            return torch.bmm(A, features)
 
     def __init__(self, in_dim: int, out_dim: int) -> None:
         super().__init__()
@@ -1176,6 +1173,4 @@ class GCN(BaseModule):
             edge_feat[graph_ind, :, :] = node_feats[graph_ind,
                                                     knn_inds[graph_ind]]
         edge_feat = edge_feat.view(-1, mid_feat_len)
-        pred = self.classifier(edge_feat)
-
-        return pred
+        return self.classifier(edge_feat)

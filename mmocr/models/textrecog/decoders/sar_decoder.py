@@ -96,11 +96,7 @@ class ParallelSARDecoder(BaseDecoder):
             batch_first=True,
             dropout=dec_rnn_dropout,
             bidirectional=dec_bi_rnn)
-        if dec_gru:
-            self.rnn_decoder = nn.GRU(**kwargs)
-        else:
-            self.rnn_decoder = nn.LSTM(**kwargs)
-
+        self.rnn_decoder = nn.GRU(**kwargs) if dec_gru else nn.LSTM(**kwargs)
         # Decoder input embedding
         self.embedding = nn.Embedding(
             self.num_classes,
@@ -111,7 +107,7 @@ class ParallelSARDecoder(BaseDecoder):
         self.pred_dropout = nn.Dropout(pred_dropout)
         if pred_concat:
             fc_in_channel = decoder_rnn_out_size + d_model + \
-                            encoder_rnn_out_size
+                                encoder_rnn_out_size
         else:
             fc_in_channel = d_model
         self.prediction = nn.Linear(fc_in_channel, self.num_classes)
@@ -508,9 +504,7 @@ class SequentialSARDecoder(BaseDecoder):
 
                 outputs.append(y)
 
-        outputs = torch.stack(outputs, 1)
-
-        return outputs
+        return torch.stack(outputs, 1)
 
     def forward_test(
         self,

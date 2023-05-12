@@ -41,9 +41,13 @@ class SDMGRPostProcessor:
                  link_type: str = 'none',
                  key_node_idx: Optional[int] = None,
                  value_node_idx: Optional[int] = None):
-        assert link_type in [
-            'one-to-one', 'one-to-many', 'many-to-one', 'many-to-many', 'none'
-        ]
+        assert link_type in {
+            'one-to-one',
+            'one-to-many',
+            'many-to-one',
+            'many-to-many',
+            'none',
+        }
         self.link_type = link_type
         if link_type != 'none':
             assert key_node_idx is not None and value_node_idx is not None

@@ -287,7 +287,7 @@ class E2EPointMetric(BaseMetric):
                         (ord(u'Ά'), ord(u'Ͽ')), (ord(u'-'), ord(u'-'))]
         for char in text:
             code = ord(char)
-            if (not_allowed.find(char) != -1):
+            if char in not_allowed:
                 return False
             valid = any(code >= r[0] and code <= r[1] for r in valid_ranges)
             if not valid:
@@ -308,8 +308,5 @@ class E2EPointMetric(BaseMetric):
             norm_dist = Levenshtein.normalized_distance(text, lexicon)
             if norm_dist < matched_dist:
                 matched_dist = norm_dist
-                if pairs:
-                    matched_word = pairs[lexicon]
-                else:
-                    matched_word = lexicon
+                matched_word = pairs[lexicon] if pairs else lexicon
         return matched_word, matched_dist

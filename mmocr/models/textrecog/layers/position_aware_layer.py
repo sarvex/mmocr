@@ -31,6 +31,4 @@ class PositionAwareLayer(nn.Module):
         rnn_output = rnn_output.view(n, h, w, c)
         rnn_output = rnn_output.permute(0, 3, 1, 2).contiguous()
 
-        out = self.mixer(rnn_output)
-
-        return out
+        return self.mixer(rnn_output)

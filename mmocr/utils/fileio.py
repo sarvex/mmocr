@@ -38,8 +38,7 @@ def list_from_file(filename, encoding='utf-8'):
     """
     item_list = []
     with open(filename, encoding=encoding) as f:
-        for line in f:
-            item_list.append(line.rstrip('\n\r'))
+        item_list.extend(line.rstrip('\n\r') for line in f)
     return item_list
 
 
@@ -55,10 +54,7 @@ def is_archive(file_path: str) -> bool:
 
     suffixes = ['zip', 'tar', 'tar.gz']
 
-    for suffix in suffixes:
-        if file_path.endswith(suffix):
-            return True
-    return False
+    return any(file_path.endswith(suffix) for suffix in suffixes)
 
 
 def check_integrity(file_path: str,
@@ -120,6 +116,6 @@ def list_files(path: str, suffixes: List) -> List:
 
     file_list = []
     for suffix in suffixes:
-        file_list.extend(glob(osp.join(path, '*' + suffix)))
+        file_list.extend(glob(osp.join(path, f'*{suffix}')))
 
     return file_list

@@ -32,8 +32,7 @@ class TestSDMGR(unittest.TestCase):
         """Load a configuration as a python module."""
         config_dpath = self._get_config_directory()
         config_fpath = join(config_dpath, fname)
-        config_mod = Config.fromfile(config_fpath)
-        return config_mod
+        return Config.fromfile(config_fpath)
 
     def _get_cfg(self, fname: str) -> 'ConfigDict':
         """Grab configs necessary to create a detector.

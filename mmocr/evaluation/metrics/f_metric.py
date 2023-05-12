@@ -60,8 +60,9 @@ class F1Metric(BaseMetric):
         assert isinstance(cared_classes, (list, tuple))
         assert isinstance(ignored_classes, (list, tuple))
         assert isinstance(mode, (list, str))
-        assert not (len(cared_classes) > 0 and len(ignored_classes) > 0), \
-            'cared_classes and ignored_classes cannot be both non-empty'
+        assert (
+            len(cared_classes) <= 0 or len(ignored_classes) <= 0
+        ), 'cared_classes and ignored_classes cannot be both non-empty'
 
         if isinstance(mode, str):
             mode = [mode]
@@ -70,13 +71,13 @@ class F1Metric(BaseMetric):
 
         if len(cared_classes) > 0:
             assert min(cared_classes) >= 0 and \
-                max(cared_classes) < num_classes, \
-                'cared_classes must be a subset of [0, num_classes)'
+                    max(cared_classes) < num_classes, \
+                    'cared_classes must be a subset of [0, num_classes)'
             self.cared_labels = sorted(cared_classes)
         elif len(ignored_classes) > 0:
             assert min(ignored_classes) >= 0 and \
-                max(ignored_classes) < num_classes, \
-                'ignored_classes must be a subset of [0, num_classes)'
+                    max(ignored_classes) < num_classes, \
+                    'ignored_classes must be a subset of [0, num_classes)'
             self.cared_labels = sorted(
                 set(range(num_classes)) - set(ignored_classes))
         else:

@@ -12,8 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Generate training and validation set of COCO Text v2 ')
     parser.add_argument('root_path', help='Root dir path of COCO Text v2')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def collect_cocotext_info(root_path, split, print_every=1000):

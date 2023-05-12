@@ -44,8 +44,8 @@ class NAFGatherer(BaseGatherer):
         split_file = osp.join(self.data_root, self.split_file)
         with open(split_file, 'r') as f:
             split_data = json.load(f)
-        img_list = list()
-        ann_list = list()
+        img_list = []
+        ann_list = []
         # Rename the key
         split_data['val'] = split_data.pop('valid')
         if not osp.exists(self.img_dir):

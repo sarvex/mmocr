@@ -94,10 +94,7 @@ class BezierRoIExtractor(BaseRoIExtractor):
             rois.size(0), self.out_channels, *out_size)
 
         if num_levels == 1:
-            if len(rois) == 0:
-                return roi_feats
-            return self.roi_layers[0](feats[0], rois)
-
+            return roi_feats if len(rois) == 0 else self.roi_layers[0](feats[0], rois)
         target_lvls = self.map_roi_levels(rois, num_levels)
 
         for i in range(num_levels):

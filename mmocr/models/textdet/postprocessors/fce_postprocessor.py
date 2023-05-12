@@ -85,9 +85,7 @@ class FCEPostprocessor(BaseTextDetPostProcessor):
         for i in range(batch_num):
             batch_list = []
             for level in range(level_num):
-                feat_dict = {}
-                for field in fields:
-                    feat_dict[field] = pred_results[level][field][i]
+                feat_dict = {field: pred_results[level][field][i] for field in fields}
                 batch_list.append(feat_dict)
             results.append(batch_list)
         return results
@@ -155,7 +153,7 @@ class FCEPostprocessor(BaseTextDetPostProcessor):
         """
 
         cls_pred = pred_result['cls_res']
-        tr_pred = cls_pred[0:2].softmax(dim=0).data.cpu().numpy()
+        tr_pred = cls_pred[:2].softmax(dim=0).data.cpu().numpy()
         tcl_pred = cls_pred[2:].softmax(dim=0).data.cpu().numpy()
 
         reg_pred = pred_result['reg_res'].permute(1, 2, 0).data.cpu().numpy()

@@ -52,7 +52,10 @@ for f in files:
         paper_link = title2anchor(
             re.search(
                 rf'\btitle\s*=\s*{{\s*{q}\s*}}.*?\n## (.*?)\s*[,;]?\s*\n',
-                revcontent, re.DOTALL | re.IGNORECASE).group(1))
+                revcontent,
+                re.DOTALL | re.IGNORECASE,
+            )[1]
+        )
         paperlinks[p] = f'[{p}]({splitext(basename(f))[0]}.md#{paper_link})'
     paperlist = '\n'.join(
         sorted(f'    - [{t}] {paperlinks[x]}' for t, x in papers))

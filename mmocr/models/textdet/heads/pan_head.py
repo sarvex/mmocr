@@ -73,10 +73,7 @@ class PANHead(BaseTextDetHead):
             Tensor: A tensor of shape :math:`(N, C_{out}, W, H)` where
             :math:`C_{out}` is ``output_channels``.
         """
-        if isinstance(inputs, tuple):
-            outputs = torch.cat(inputs, dim=1)
-        else:
-            outputs = inputs
+        outputs = torch.cat(inputs, dim=1) if isinstance(inputs, tuple) else inputs
         outputs = self.conv1(outputs)
         outputs = self.relu1(self.bn1(outputs))
         outputs = self.conv2(outputs)

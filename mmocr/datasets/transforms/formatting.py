@@ -85,7 +85,7 @@ class PackTextDetInputs(BaseTransform):
             - 'data_samples' (obj:`DetDataSample`): The annotation info of the
               sample.
         """
-        packed_results = dict()
+        packed_results = {}
         if 'img' in results:
             img = results['img']
             if len(img.shape) < 3:
@@ -114,9 +114,7 @@ class PackTextDetInputs(BaseTransform):
                 instance_data[self.mapping_table[key]] = results[key]
         data_sample.gt_instances = instance_data
 
-        img_meta = {}
-        for key in self.meta_keys:
-            img_meta[key] = results[key]
+        img_meta = {key: results[key] for key in self.meta_keys}
         data_sample.set_metainfo(img_meta)
         packed_results['data_samples'] = data_sample
 
@@ -178,7 +176,7 @@ class PackTextRecogInputs(BaseTransform):
             - 'data_samples' (obj:`TextRecogDataSample`): The annotation info
                 of the sample.
         """
-        packed_results = dict()
+        packed_results = {}
         if 'img' in results:
             img = results['img']
             if len(img.shape) < 3:
@@ -205,12 +203,12 @@ class PackTextRecogInputs(BaseTransform):
             gt_text.item = results['gt_texts'][0]
         data_sample.gt_text = gt_text
 
-        img_meta = {}
-        for key in self.meta_keys:
-            if key == 'valid_ratio':
-                img_meta[key] = results.get('valid_ratio', 1)
-            else:
-                img_meta[key] = results[key]
+        img_meta = {
+            key: results.get('valid_ratio', 1)
+            if key == 'valid_ratio'
+            else results[key]
+            for key in self.meta_keys
+        }
         data_sample.set_metainfo(img_meta)
 
         packed_results['data_samples'] = data_sample
@@ -285,7 +283,7 @@ class PackKIEInputs(BaseTransform):
             - 'data_samples' (obj:`DetDataSample`): The annotation info of the
               sample.
         """
-        packed_results = dict()
+        packed_results = {}
         if 'img' in results:
             img = results['img']
             if len(img.shape) < 3:
@@ -316,9 +314,7 @@ class PackKIEInputs(BaseTransform):
                 instance_data[self.mapping_table[key]] = results[key]
         data_sample.gt_instances = instance_data
 
-        img_meta = {}
-        for key in self.meta_keys:
-            img_meta[key] = results[key]
+        img_meta = {key: results[key] for key in self.meta_keys}
         data_sample.set_metainfo(img_meta)
         packed_results['data_samples'] = data_sample
 

@@ -107,12 +107,11 @@ class RecogTextDataset(BaseDataset):
         Returns:
             List[dict]: A list of annotation.
         """
-        data_list = []
         raw_anno_infos = list_from_file(
             self.ann_file, backend_args=self.backend_args)
-        for raw_anno_info in raw_anno_infos:
-            data_list.append(self.parse_data_info(raw_anno_info))
-        return data_list
+        return [
+            self.parse_data_info(raw_anno_info) for raw_anno_info in raw_anno_infos
+        ]
 
     def parse_data_info(self, raw_anno_info: str) -> dict:
         """Parse raw annotation to target format.
@@ -124,11 +123,11 @@ class RecogTextDataset(BaseDataset):
         Returns:
             (dict): Parsed annotation.
         """
-        data_info = {}
         parsed_anno = self.parser(raw_anno_info)
         img_path = osp.join(self.data_prefix['img_path'],
                             parsed_anno[self.parser.keys[0]])
 
-        data_info['img_path'] = img_path
-        data_info['instances'] = [dict(text=parsed_anno[self.parser.keys[1]])]
-        return data_info
+        return {
+            'img_path': img_path,
+            'instances': [dict(text=parsed_anno[self.parser.keys[1]])],
+        }

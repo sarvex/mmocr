@@ -139,11 +139,7 @@ class SequenceAttentionDecoder(BaseDecoder):
         query, _ = self.sequence_layer(tgt_embedding)
         query = query.permute(0, 2, 1).contiguous()
         key = out_enc.view(n, c_enc, h * w)
-        if self.encode_value:
-            value = key
-        else:
-            value = feat.view(n, c_feat, h * w)
-
+        value = key if self.encode_value else feat.view(n, c_feat, h * w)
         mask = None
         if valid_ratios is not None:
             mask = query.new_zeros((n, h, w))
@@ -156,12 +152,7 @@ class SequenceAttentionDecoder(BaseDecoder):
         attn_out = self.attention_layer(query, key, value, mask)
         attn_out = attn_out.permute(0, 2, 1).contiguous()
 
-        if self.return_feature:
-            return attn_out
-
-        out = self.prediction(attn_out)
-
-        return out
+        return attn_out if self.return_feature else self.prediction(attn_out)
 
     def forward_test(self, feat: torch.Tensor, out_enc: torch.Tensor,
                      data_samples: Optional[Sequence[TextRecogDataSample]]
@@ -235,11 +226,7 @@ class SequenceAttentionDecoder(BaseDecoder):
         query, _ = self.sequence_layer(embed)
         query = query.permute(0, 2, 1).contiguous()
         key = out_enc.view(n, c_enc, h * w)
-        if self.encode_value:
-            value = key
-        else:
-            value = feat.view(n, c_feat, h * w)
-
+        value = key if self.encode_value else feat.view(n, c_feat, h * w)
         mask = None
         if valid_ratios is not None:
             mask = query.new_zeros((n, h, w))

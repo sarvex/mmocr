@@ -28,7 +28,7 @@ class LineStrParser:
         assert isinstance(keys, list)
         assert isinstance(keys_idx, list)
         assert isinstance(separator, str)
-        assert len(keys) > 0
+        assert keys
         assert len(keys) == len(keys_idx)
         self.keys = keys
         self.keys_idx = keys_idx
@@ -38,8 +38,10 @@ class LineStrParser:
     def __call__(self, in_str: str) -> Dict:
         line_str = self.strip_cls(in_str)
         if len(line_str.split(' ')) > 2:
-            msg = 'More than two blank spaces were detected. '
-            msg += 'Please use LineJsonParser to handle '
+            msg = (
+                'More than two blank spaces were detected. '
+                + 'Please use LineJsonParser to handle '
+            )
             msg += 'annotations with blanks. '
             msg += 'Check Doc '
             msg += 'https://mmocr.readthedocs.io/en/latest/'
@@ -51,10 +53,7 @@ class LineStrParser:
             raise ValueError(
                 f'key index: {max(self.keys_idx)} out of range: {line_str}')
 
-        line_info = {}
-        for i, key in enumerate(self.keys):
-            line_info[key] = line_str[self.keys_idx[i]]
-        return line_info
+        return {key: line_str[self.keys_idx[i]] for i, key in enumerate(self.keys)}
 
 
 @TASK_UTILS.register_module()
@@ -68,7 +67,7 @@ class LineJsonParser:
 
     def __init__(self, keys: Tuple[str, str] = ['filename', 'text']) -> None:
         assert isinstance(keys, list)
-        assert len(keys) > 0
+        assert keys
         self.keys = keys
 
     def __call__(self, in_str: str) -> Dict:

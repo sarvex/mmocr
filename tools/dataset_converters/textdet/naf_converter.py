@@ -60,13 +60,11 @@ def collect_annotations(files, nproc=1):
     assert isinstance(files, list)
     assert isinstance(nproc, int)
 
-    if nproc > 1:
-        images = mmengine.track_parallel_progress(
-            load_img_info, files, nproc=nproc)
-    else:
-        images = mmengine.track_progress(load_img_info, files)
-
-    return images
+    return (
+        mmengine.track_parallel_progress(load_img_info, files, nproc=nproc)
+        if nproc > 1
+        else mmengine.track_progress(load_img_info, files)
+    )
 
 
 def load_img_info(files):
@@ -136,16 +134,14 @@ def load_json_info(gt_file, img_info):
     for box_type in ['textBBs', 'fieldBBs']:
         for anno in annotation[box_type]:
             # Skip blanks
-            if box_type == 'fieldBBs':
-                if anno['type'] == 'blank':
-                    continue
+            if box_type == 'fieldBBs' and anno['type'] == 'blank':
+                continue
 
             xs, ys, segmentation = [], [], []
             for p in anno['poly_points']:
                 xs.append(p[0])
                 ys.append(p[1])
-                segmentation.append(p[0])
-                segmentation.append(p[1])
+                segmentation.extend((p[0], p[1]))
             x, y = max(0, min(xs)), max(0, min(ys))
             w, h = max(xs) - x, max(ys) - y
             bbox = [x, y, w, h]
@@ -169,8 +165,7 @@ def parse_args():
     parser.add_argument('root_path', help='Root dir path of NAF')
     parser.add_argument(
         '--nproc', default=1, type=int, help='Number of process')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():
@@ -183,14 +178,16 @@ def main():
     for split in ['training', 'val', 'test']:
         print(f'Processing {split} set...')
         with mmengine.Timer(
-                print_tmpl='It takes {}s to convert NAF annotation'):
+                        print_tmpl='It takes {}s to convert NAF annotation'):
             files = collect_files(
                 osp.join(root_path, 'imgs'),
                 osp.join(root_path, 'annotations'), split_info[split])
             image_infos = collect_annotations(files, nproc=args.nproc)
-            dump_ocr_data(image_infos,
-                          osp.join(root_path, 'instances_' + split + '.json'),
-                          'textdet')
+            dump_ocr_data(
+                image_infos,
+                osp.join(root_path, f'instances_{split}.json'),
+                'textdet',
+            )
 
 
 if __name__ == '__main__':

@@ -19,14 +19,10 @@ class TestEncoderDecoderRecognizer(TestCase):
             return x + self.value
 
         def predict(self, x, y, *args, **kwargs):
-            if y is None:
-                return x
-            return x + y
+            return x if y is None else x + y
 
         def loss(self, x, y, *args, **kwargs):
-            if y is None:
-                return x
-            return x * y
+            return x if y is None else x * y
 
     def test_init(self):
         # Decoder is not allowed to be None

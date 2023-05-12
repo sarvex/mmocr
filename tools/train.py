@@ -87,7 +87,6 @@ def main():
     if args.resume:
         cfg.resume = True
 
-    # enable automatically scaling LR
     if args.auto_scale_lr:
         if 'auto_scale_lr' in cfg and \
                 'base_batch_size' in cfg.auto_scale_lr:
@@ -98,14 +97,7 @@ def main():
                                ' configuration file.')
 
     # build the runner from config
-    if 'runner_type' not in cfg:
-        # build the default runner
-        runner = Runner.from_cfg(cfg)
-    else:
-        # build customized runner from the registry
-        # if 'runner_type' is set in the cfg
-        runner = RUNNERS.build(cfg)
-
+    runner = RUNNERS.build(cfg) if 'runner_type' in cfg else Runner.from_cfg(cfg)
     # start training
     runner.train()
 

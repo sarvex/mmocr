@@ -145,7 +145,7 @@ class TextSnakePostprocessor(BaseTextDetPostProcessor):
         Returns:
             List[torch.Tensor]: The text score and kernel score.
         """
-        pred_results = [pred_result for pred_result in pred_results]
+        pred_results = list(pred_results)
         return pred_results
 
     @staticmethod
@@ -189,8 +189,7 @@ class TextSnakePostprocessor(BaseTextDetPostProcessor):
                 next_x < w) & contour_mask[np.clip(next_y, 0, h - 1),
                                            np.clip(next_x, 0, w - 1)]
             bot_yx = bot_yx - step_flags.reshape((-1, 1)) * step
-        centers = np.array((top_yx + bot_yx) * 0.5, dtype=np.int32)
-        return centers
+        return np.array((top_yx + bot_yx) * 0.5, dtype=np.int32)
 
     @staticmethod
     def _merge_disks(disks: np.ndarray, disk_overlap_thr: float) -> np.ndarray:
@@ -229,6 +228,4 @@ class TextSnakePostprocessor(BaseTextDetPostProcessor):
 
             inds = np.where(d > d_thr)[0] + 1
             order = order[inds]
-        merged_disks = np.vstack(merged_disks)
-
-        return merged_disks
+        return np.vstack(merged_disks)

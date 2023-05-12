@@ -56,7 +56,7 @@ class PANModuleLoss(SegBasedModuleLoss):
             max_shrink_dist: Union[int, float] = 20,
             reduction: str = 'mean') -> None:
         super().__init__()
-        assert reduction in ['mean', 'sum'], "reduction must in ['mean','sum']"
+        assert reduction in {'mean', 'sum'}, "reduction must in ['mean','sum']"
         self.weight_text = weight_text
         self.weight_kernel = weight_kernel
         self.weight_embedding = weight_embedding
@@ -114,7 +114,7 @@ class PANModuleLoss(SegBasedModuleLoss):
         else:
             losses = [item.sum() for item in losses]
 
-        results = dict()
+        results = {}
         results.update(
             loss_text=self.weight_text * losses[0],
             loss_kernel=self.weight_kernel * losses[1],
@@ -191,11 +191,10 @@ class PANModuleLoss(SegBasedModuleLoss):
         assert text_scores.shape == gt_texts.shape
         assert gt_texts.shape == gt_mask.shape
 
-        sampled_masks = []
-        for i in range(text_scores.shape[0]):
-            sampled_masks.append(
-                self._ohem_single(text_scores[i], gt_texts[i], gt_mask[i]))
-
+        sampled_masks = [
+            self._ohem_single(text_scores[i], gt_texts[i], gt_mask[i])
+            for i in range(text_scores.shape[0])
+        ]
         sampled_masks = torch.stack(sampled_masks)
 
         return sampled_masks
@@ -232,9 +231,9 @@ class PANModuleLoss(SegBasedModuleLoss):
         neg_score = text_score[gt_text <= 0.5]
         neg_score_sorted, _ = torch.sort(neg_score, descending=True)
         threshold = neg_score_sorted[neg_num - 1]
-        sampled_mask = (((text_score >= threshold) + (gt_text > 0.5)) > 0) * (
-            gt_mask > 0.5)
-        return sampled_mask
+        return (((text_score >= threshold) + (gt_text > 0.5)) > 0) * (
+            gt_mask > 0.5
+        )
 
 
 @MODELS.register_module()
@@ -324,8 +323,7 @@ class PANEmbLossV1(nn.Module):
         l_agg = self.weights[0] * l_agg
         l_dis = self.weights[1] * l_dis
         l_reg = torch.mean(torch.log(torch.norm(emb_mean, 2, 0) + 1.0)) * 0.001
-        loss = l_agg + l_dis + l_reg
-        return loss
+        return l_agg + l_dis + l_reg
 
     def forward(self, emb: torch.Tensor, instance: torch.Tensor,
                 kernel: torch.Tensor,

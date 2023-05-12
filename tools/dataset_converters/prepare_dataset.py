@@ -47,8 +47,7 @@ def parse_args():
         '--dataset-zoo-path',
         default='./dataset_zoo',
         help='Path to dataset zoo config files.')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def parse_meta(task: str, meta_path: str) -> None:
@@ -90,8 +89,7 @@ def force_lmdb(cfg):
         Config: Config object.
     """
     for split in ['train', 'val', 'test']:
-        preparer_cfg = cfg.get(f'{split}_preparer')
-        if preparer_cfg:
+        if preparer_cfg := cfg.get(f'{split}_preparer'):
             if preparer_cfg.get('dumper') is None:
                 raise ValueError(
                     f'{split} split does not come with a dumper, '
@@ -112,13 +110,12 @@ def force_lmdb(cfg):
             for ann_dict in ann_list:
                 ann_dict['ann_file'] = (
                     osp.splitext(ann_dict['ann_file'])[0] + '.lmdb')
+        elif split == 'test_anns':
+            ann_list = [dict(ann_file='textrecog_test.lmdb')]
+        elif split == 'train_anns':
+            ann_list = [dict(ann_file='textrecog_train.lmdb')]
         else:
-            if split == 'train_anns':
-                ann_list = [dict(ann_file='textrecog_train.lmdb')]
-            elif split == 'test_anns':
-                ann_list = [dict(ann_file='textrecog_test.lmdb')]
-            else:
-                ann_list = []
+            ann_list = []
         cfg.config_generator[split] = ann_list
 
     return cfg
@@ -135,7 +132,7 @@ def main():
             continue
         meta_path = osp.join(args.dataset_zoo_path, dataset, 'metafile.yml')
         parse_meta(args.task, meta_path)
-        cfg_path = osp.join(args.dataset_zoo_path, dataset, args.task + '.py')
+        cfg_path = osp.join(args.dataset_zoo_path, dataset, f'{args.task}.py')
         cfg = Config.fromfile(cfg_path)
         if args.overwrite_cfg and cfg.get('config_generator',
                                           None) is not None:

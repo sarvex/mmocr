@@ -319,7 +319,7 @@ class FusionBlock(nn.Module):
         self.dropout_input = dropout_input
         self.dropout_pre_lin = dropout_pre_lin
         self.dropout_output = dropout_output
-        assert (pos_norm in ['before_cat', 'after_cat'])
+        assert pos_norm in {'before_cat', 'after_cat'}
         self.pos_norm = pos_norm
         # Modules
         self.linear0 = nn.Linear(input_dims[0], mm_dim)

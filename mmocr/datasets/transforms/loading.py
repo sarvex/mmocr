@@ -109,11 +109,10 @@ class LoadImageFromFile(MMCV_LoadImageFromFile):
             img = mmcv.imfrombytes(
                 img_bytes, flag=self.color_type, backend=self.imdecode_backend)
         except Exception as e:
-            if self.ignore_empty:
-                warnings.warn(f'Failed to load {filename} due to {e}')
-                return None
-            else:
+            if not self.ignore_empty:
                 raise e
+            warnings.warn(f'Failed to load {filename} due to {e}')
+            return None
         if img is None or min(img.shape[:2]) < self.min_size:
             if self.ignore_empty:
                 warnings.warn(f'Ignore broken image: {filename}')
@@ -235,10 +234,7 @@ class InferencerLoader(BaseTransform):
         else:
             raise NotImplementedError
 
-        if 'img' in inputs:
-            return self.from_ndarray(inputs)
-
-        return self.from_file(inputs)
+        return self.from_ndarray(inputs) if 'img' in inputs else self.from_file(inputs)
 
 
 @TRANSFORMS.register_module()
@@ -346,9 +342,7 @@ class LoadOCRAnnotations(MMCV_LoadAnnotations):
         Returns:
             dict: The dict contains loaded ignore annotations.
         """
-        gt_ignored = []
-        for instance in results['instances']:
-            gt_ignored.append(instance['ignore'])
+        gt_ignored = [instance['ignore'] for instance in results['instances']]
         results['gt_ignored'] = np.array(gt_ignored, dtype=np.bool_)
 
     def _load_polygons(self, results: dict) -> None:
@@ -361,9 +355,10 @@ class LoadOCRAnnotations(MMCV_LoadAnnotations):
             dict: The dict contains loaded polygon annotations.
         """
 
-        gt_polygons = []
-        for instance in results['instances']:
-            gt_polygons.append(np.array(instance['polygon'], dtype=np.float32))
+        gt_polygons = [
+            np.array(instance['polygon'], dtype=np.float32)
+            for instance in results['instances']
+        ]
         results['gt_polygons'] = gt_polygons
 
     def _load_texts(self, results: dict) -> None:
@@ -375,9 +370,7 @@ class LoadOCRAnnotations(MMCV_LoadAnnotations):
         Returns:
             dict: The dict contains loaded text annotations.
         """
-        gt_texts = []
-        for instance in results['instances']:
-            gt_texts.append(instance['text'])
+        gt_texts = [instance['text'] for instance in results['instances']]
         results['gt_texts'] = gt_texts
 
     def transform(self, results: dict) -> dict:
@@ -510,9 +503,7 @@ class LoadKIEAnnotations(MMCV_LoadAnnotations):
         Args:
             results (dict): Result dict from :obj:``OCRDataset``.
         """
-        gt_texts = []
-        for instance in results['instances']:
-            gt_texts.append(instance['text'])
+        gt_texts = [instance['text'] for instance in results['instances']]
         results['gt_texts'] = gt_texts
 
     def _load_labels(self, results: dict) -> None:

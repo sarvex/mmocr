@@ -94,11 +94,9 @@ class FCEHead(BaseTextDetHead):
         """
         cls_res, reg_res = multi_apply(self.forward_single, inputs)
         level_num = len(cls_res)
-        preds = [
-            dict(cls_res=cls_res[i], reg_res=reg_res[i])
-            for i in range(level_num)
+        return [
+            dict(cls_res=cls_res[i], reg_res=reg_res[i]) for i in range(level_num)
         ]
-        return preds
 
     def forward_single(self, x: torch.Tensor) -> torch.Tensor:
         """Forward function for a single feature level.

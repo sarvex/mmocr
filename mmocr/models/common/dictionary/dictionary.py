@@ -123,7 +123,7 @@ class Dictionary:
         Return:
             list: The list of indexes of the string.
         """
-        idx = list()
+        idx = []
         for s in string:
             char_idx = self.char2idx(s)
             if char_idx is None:
@@ -182,7 +182,4 @@ class Dictionary:
             self._dict.append(self.unknown_token)
             self.unknown_idx = len(self._dict) - 1
 
-        # update char2idx
-        self._char2idx = {}
-        for idx, char in enumerate(self._dict):
-            self._char2idx[char] = idx
+        self._char2idx = {char: idx for idx, char in enumerate(self._dict)}

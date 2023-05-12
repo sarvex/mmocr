@@ -161,7 +161,7 @@ class SPTSModuleLoss(CEModuleLoss):
                 indexes_tensor = indexes_tensor
                 gt_indexes.append(indexes_tensor)
 
-            if len(gt_indexes) == 0:
+            if not gt_indexes:
                 gt_indexes = torch.ones(0).reshape(-1, self.max_text_len)
             else:
                 gt_indexes = torch.vstack(gt_indexes)
@@ -213,9 +213,9 @@ class SPTSModuleLoss(CEModuleLoss):
         Returns:
             dict: A loss dict with the key ``loss_ce``.
         """
-        targets = list()
-        for data_sample in data_samples:
-            targets.append(data_sample.gt_instances.padded_indexes)
+        targets = [
+            data_sample.gt_instances.padded_indexes for data_sample in data_samples
+        ]
         targets = torch.stack(targets, dim=0).long()
         if self.ignore_first_char:
             targets = targets[:, 1:].contiguous()
@@ -227,6 +227,4 @@ class SPTSModuleLoss(CEModuleLoss):
             outputs = outputs.permute(0, 2, 1).contiguous()
 
         loss_ce = self.loss_ce(outputs, targets.to(outputs.device))
-        losses = dict(loss_ce=loss_ce)
-
-        return losses
+        return dict(loss_ce=loss_ce)

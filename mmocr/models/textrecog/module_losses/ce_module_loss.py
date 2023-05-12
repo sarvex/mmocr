@@ -74,7 +74,7 @@ class CEModuleLoss(BaseTextRecogModuleLoss):
             pad_with=pad_with)
         assert isinstance(ignore_char, (int, str))
         assert isinstance(reduction, str)
-        assert reduction in ['none', 'mean', 'sum']
+        assert reduction in {'none', 'mean', 'sum'}
         assert isinstance(ignore_first_char, bool)
         assert isinstance(flatten, bool)
         self.flatten = flatten
@@ -119,9 +119,7 @@ class CEModuleLoss(BaseTextRecogModuleLoss):
         Returns:
             dict: A loss dict with the key ``loss_ce``.
         """
-        targets = list()
-        for data_sample in data_samples:
-            targets.append(data_sample.gt_text.padded_indexes)
+        targets = [data_sample.gt_text.padded_indexes for data_sample in data_samples]
         targets = torch.stack(targets, dim=0).long()
         if self.ignore_first_char:
             targets = targets[:, 1:].contiguous()
@@ -133,6 +131,4 @@ class CEModuleLoss(BaseTextRecogModuleLoss):
             outputs = outputs.permute(0, 2, 1).contiguous()
 
         loss_ce = self.loss_ce(outputs, targets.to(outputs.device))
-        losses = dict(loss_ce=loss_ce)
-
-        return losses
+        return dict(loss_ce=loss_ce)

@@ -28,8 +28,7 @@ def seg2bbox(seg):
         seg = np.array(seg).reshape(-1, 2)
         polygon = Polygon(seg)
         min_x, min_y, max_x, max_y = polygon.bounds
-    bbox = [min_x, min_y, max_x - min_x, max_y - min_y]
-    return bbox
+    return [min_x, min_y, max_x - min_x, max_y - min_y]
 
 
 def process_level(
@@ -63,9 +62,7 @@ def process_level(
     dst_img_path = osp.join(dst_image_root, dst_img_name)
     mmcv.imwrite(dst_img, dst_img_path)
 
-    label = {'file_name': dst_img_name, 'anno_info': [{'text': text_label}]}
-
-    return label
+    return {'file_name': dst_img_name, 'anno_info': [{'text': text_label}]}
 
 
 def process_img(args, src_image_root, dst_image_root, ignore_image_root, level,
@@ -158,7 +155,7 @@ def convert_hiertext(
         img_info (dict): The dict of the img and annotation information
     """
 
-    annotation_path = osp.join(root_path, 'annotations/' + split + '.jsonl')
+    annotation_path = osp.join(root_path, f'annotations/{split}.jsonl')
     if not osp.exists(annotation_path):
         raise Exception(
             f'{annotation_path} not exists, please check and try again.')
@@ -180,9 +177,7 @@ def convert_hiertext(
         level=level,
         preserve_vertical=preserve_vertical,
         split=split)
-    tasks = []
-    for img_idx, img_info in enumerate(annotation):
-        tasks.append((img_idx, img_info))
+    tasks = list(enumerate(annotation))
     labels_list = mmengine.track_parallel_progress(
         process_img_with_path, tasks, keep_order=True, nproc=nproc)
 
@@ -208,8 +203,7 @@ def parse_args():
         default='word',
         help='Crop word or line level instance',
         choices=['word', 'line'])
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():

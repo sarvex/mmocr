@@ -20,10 +20,7 @@ class TestABIModuleLoss(TestCase):
         self.gt = [data_sample1, data_sample2]
 
     def _equal(self, a, b):
-        if isinstance(a, (torch.Tensor, np.ndarray)):
-            return (a == b).all()
-        else:
-            return a == b
+        return (a == b).all() if isinstance(a, (torch.Tensor, np.ndarray)) else a == b
 
     def test_forward(self):
         dict_cfg = dict(

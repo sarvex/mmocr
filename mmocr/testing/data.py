@@ -36,18 +36,13 @@ def create_dummy_textdet_inputs(input_shape: Sequence[int] = (1, 3, 300, 300),
         scale_factor=(1, 1),
         flip=False)
 
-    gt_masks = []
     gt_kernels = []
     gt_effective_mask = []
 
     data_samples = []
 
     for batch_idx in range(N):
-        if num_items is None:
-            num_boxes = rng.randint(1, 10)
-        else:
-            num_boxes = num_items[batch_idx]
-
+        num_boxes = rng.randint(1, 10) if num_items is None else num_items[batch_idx]
         data_sample = TextDetDataSample(
             metainfo=metainfo, gt_instances=InstanceData())
 
@@ -76,9 +71,8 @@ def create_dummy_textdet_inputs(input_shape: Sequence[int] = (1, 3, 300, 300),
         gt_effective_mask.append(np.ones((H, W)))
 
     mask = np.random.randint(0, 2, (len(boxes), H, W), dtype=np.uint8)
-    gt_masks.append(mask)
-
-    mm_inputs = {
+    gt_masks = [mask]
+    return {
         'imgs': torch.FloatTensor(imgs).requires_grad_(True),
         'data_samples': data_samples,
         'gt_masks': gt_masks,
@@ -91,7 +85,6 @@ def create_dummy_textdet_inputs(input_shape: Sequence[int] = (1, 3, 300, 300),
         'gt_sin_map': gt_kernels,
         'gt_cos_map': gt_kernels,
     }
-    return mm_inputs
 
 
 def create_dummy_dict_file(

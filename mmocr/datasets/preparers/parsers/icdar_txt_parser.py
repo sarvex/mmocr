@@ -49,7 +49,7 @@ class ICDARTxtTextDetAnnParser(BaseParser):
 
     def parse_file(self, img_path: str, ann_path: str) -> Tuple:
         """Parse single annotation."""
-        instances = list()
+        instances = []
         for anno in self.loader(ann_path, self.sep, self.format,
                                 self.encoding):
             anno = list(anno.values())
@@ -58,7 +58,7 @@ class ICDARTxtTextDetAnnParser(BaseParser):
                     for i in range(len(anno)):
                         if strs in anno[i]:
                             anno[i] = anno[i].replace(strs, '')
-            poly = list(map(float, anno[0:-1]))
+            poly = list(map(float, anno[:-1]))
             if self.mode is not None:
                 poly = bbox2poly(poly, self.mode)
                 poly = poly.tolist()
@@ -109,7 +109,7 @@ class ICDARTxtTextRecogAnnParser(BaseParser):
     def parse_files(self, img_dir: str, ann_path: str) -> List:
         """Parse annotations."""
         assert isinstance(ann_path, str)
-        samples = list()
+        samples = []
         for anno in self.loader(
                 file_path=ann_path,
                 format=self.format,

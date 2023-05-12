@@ -26,8 +26,6 @@ class TestFPNC(unittest.TestCase):
                     asf_cfg=asf_cfg,
                     conv_after_concat=flag)
             fpnc.init_weights()
-            inputs = []
-            for i in range(4):
-                inputs.append(torch.rand(1, in_channels[i], size[i], size[i]))
+            inputs = [torch.rand(1, in_channels[i], size[i], size[i]) for i in range(4)]
             outputs = fpnc.forward(inputs)
             self.assertListEqual(list(outputs.size()), [1, 256, 112, 112])

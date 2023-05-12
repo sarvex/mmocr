@@ -46,8 +46,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Generate training and test set of IC11')
     parser.add_argument('root_path', help='Root dir path of IC11')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():

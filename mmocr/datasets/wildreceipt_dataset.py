@@ -214,14 +214,13 @@ class WildReceiptDataset(BaseDataset):
             dict: Parsed meta information.
         """
         cls_metainfo = copy.deepcopy(cls.METAINFO)
-        if isinstance(metainfo, str):
-            cls_metainfo['category'] = []
-            for line in list_from_file(metainfo):
-                k, v = line.split()
-                cls_metainfo['category'].append({'id': k, 'name': v})
-            return cls_metainfo
-        else:
+        if not isinstance(metainfo, str):
             return super()._load_metainfo(metainfo)
+        cls_metainfo['category'] = []
+        for line in list_from_file(metainfo):
+            k, v = line.split()
+            cls_metainfo['category'].append({'id': k, 'name': v})
+        return cls_metainfo
 
     def load_data_list(self) -> List[dict]:
         """Load data list from annotation file.
@@ -266,17 +265,22 @@ class WildReceiptDataset(BaseDataset):
         instances = []
 
         for ann in annotations:
-            instance = {}
             bbox = np.array(sort_vertex8(ann['box']), dtype=np.int32)
-            bbox = np.array([
-                bbox[0::2].min(), bbox[1::2].min(), bbox[0::2].max(),
-                bbox[1::2].max()
-            ],
-                            dtype=np.int32)
+            bbox = np.array(
+                [
+                    bbox[::2].min(),
+                    bbox[1::2].min(),
+                    bbox[::2].max(),
+                    bbox[1::2].max(),
+                ],
+                dtype=np.int32,
+            )
 
-            instance['bbox'] = bbox
-            instance['text'] = ann['text']
-            instance['bbox_label'] = ann.get('label', 0)
+            instance = {
+                'bbox': bbox,
+                'text': ann['text'],
+                'bbox_label': ann.get('label', 0),
+            }
             instance['edge_label'] = ann.get('edge', 0)
             instances.append(instance)
 

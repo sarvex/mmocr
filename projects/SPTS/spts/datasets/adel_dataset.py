@@ -54,19 +54,16 @@ class AdelDataset(CocoDataset):
         img_info = raw_data_info['raw_img_info']
         ann_info = raw_data_info['raw_ann_info']
 
-        data_info = {}
-
         img_path = osp.join(self.data_prefix['img_path'],
                             img_info['file_name'])
-        data_info['img_path'] = img_path
-        data_info['img_id'] = img_info['img_id']
-        data_info['height'] = img_info['height']
-        data_info['width'] = img_info['width']
-
+        data_info = {
+            'img_path': img_path,
+            'img_id': img_info['img_id'],
+            'height': img_info['height'],
+            'width': img_info['width'],
+        }
         instances = []
         for ann in ann_info:
-            instance = {}
-
             if ann.get('ignore', False):
                 continue
             x1, y1, w, h = ann['bbox']
@@ -80,10 +77,7 @@ class AdelDataset(CocoDataset):
                 continue
             bbox = [x1, y1, x1 + w, y1 + h]
 
-            if ann.get('iscrowd', False):
-                instance['ignore'] = 1
-            else:
-                instance['ignore'] = 0
+            instance = {'ignore': 1 if ann.get('iscrowd', False) else 0}
             instance['bbox'] = bbox
             instance['bbox_label'] = self.cat2label[ann['category_id']]
             # instance['polygon'] = bezier2poly(

@@ -79,8 +79,7 @@ class DatasetPreparer:
         """Prepare the dataset."""
         if isinstance(splits, str):
             splits = [splits]
-        assert set(splits).issubset(set(['train', 'test',
-                                         'val'])), 'Invalid split name'
+        assert set(splits).issubset({'train', 'test', 'val'}), 'Invalid split name'
         for split in splits:
             self.loop(split, getattr(self, f'{split}_preparer'))
         self.clean()
@@ -99,7 +98,7 @@ class DatasetPreparer:
         """
 
         cfg = copy.deepcopy(cfg)
-        data_preparer = cls(
+        return cls(
             data_root=cfg['data_root'],
             dataset_name=cfg.get('dataset_name', ''),
             task=cfg.get('task', 'textdet'),
@@ -108,8 +107,8 @@ class DatasetPreparer:
             test_preparer=cfg.get('test_preparer', None),
             val_preparer=cfg.get('val_preparer', None),
             delete=cfg.get('delete', None),
-            config_generator=cfg.get('config_generator', None))
-        return data_preparer
+            config_generator=cfg.get('config_generator', None),
+        )
 
     def loop(self, split: str, cfg: ConfigType) -> None:
         """Loop over the dataset.
@@ -122,9 +121,7 @@ class DatasetPreparer:
         if cfg is None:
             return
 
-        # build obtainer and run
-        obtainer = cfg.get('obtainer', None)
-        if obtainer:
+        if obtainer := cfg.get('obtainer', None):
             print(f'Obtaining {split} Dataset...')
             obtainer.setdefault('task', default=self.task)
             obtainer.setdefault('data_root', default=self.data_root)
@@ -139,7 +136,7 @@ class DatasetPreparer:
         related = [gatherer, parser, packer, dumper]
         if all(item is None for item in related):  # no data process
             return
-        if not all(item is not None for item in related):
+        if any(item is None for item in related):
             raise ValueError('gatherer, parser, packer and dumper should be '
                              'either all None or not None')
 

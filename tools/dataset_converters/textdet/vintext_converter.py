@@ -26,7 +26,7 @@ def collect_files(img_dir, gt_dir):
 
     ann_list, imgs_list = [], []
     for img_file in os.listdir(img_dir):
-        ann_file = 'gt_' + str(int(img_file[2:6])) + '.txt'
+        ann_file = f'gt_{int(img_file[2:6])}.txt'
         ann_list.append(osp.join(gt_dir, ann_file))
         imgs_list.append(osp.join(img_dir, img_file))
 
@@ -50,13 +50,11 @@ def collect_annotations(files, nproc=1):
     assert isinstance(files, list)
     assert isinstance(nproc, int)
 
-    if nproc > 1:
-        images = mmengine.track_parallel_progress(
-            load_img_info, files, nproc=nproc)
-    else:
-        images = mmengine.track_progress(load_img_info, files)
-
-    return images
+    return (
+        mmengine.track_parallel_progress(load_img_info, files, nproc=nproc)
+        if nproc > 1
+        else mmengine.track_progress(load_img_info, files)
+    )
 
 
 def load_img_info(files):
@@ -115,7 +113,7 @@ def load_txt_info(gt_file, img_info):
         for line in f:
             line = line.strip('\n')
             ann = line.split(',')
-            bbox = ann[0:8]
+            bbox = ann[:8]
             word = line[len(','.join(bbox)) + 1:]
             bbox = [int(coord) for coord in bbox]
             segmentation = bbox
@@ -147,8 +145,7 @@ def parse_args():
     parser.add_argument('root_path', help='Root dir path of VinText')
     parser.add_argument(
         '--nproc', default=1, type=int, help='Number of processes')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():
@@ -157,14 +154,16 @@ def main():
     for split in ['training', 'test', 'unseen_test']:
         print(f'Processing {split} set...')
         with mmengine.Timer(
-                print_tmpl='It takes {}s to convert VinText annotation'):
+                        print_tmpl='It takes {}s to convert VinText annotation'):
             files = collect_files(
                 osp.join(root_path, 'imgs', split),
                 osp.join(root_path, 'annotations'))
             image_infos = collect_annotations(files, nproc=args.nproc)
-            dump_ocr_data(image_infos,
-                          osp.join(root_path, 'instances_' + split + '.json'),
-                          'textdet')
+            dump_ocr_data(
+                image_infos,
+                osp.join(root_path, f'instances_{split}.json'),
+                'textdet',
+            )
 
 
 if __name__ == '__main__':

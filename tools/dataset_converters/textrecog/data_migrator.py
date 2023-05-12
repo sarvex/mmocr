@@ -40,8 +40,8 @@ def parse_legacy_data(in_path: str,
         return file_paths, labels
     else:
         with open(in_path) as f:
-            if format == 'txt':
-                for line in f:
+            for line in f:
+                if format == 'txt':
                     line = strip_cls(line)
                     file_path, label = line.split()[:2]
                     # MJ's file_path starts with './'
@@ -50,8 +50,7 @@ def parse_legacy_data(in_path: str,
 
                     file_paths.append(file_path)
                     labels.append(label)
-            elif format == 'jsonl':
-                for line in f:
+                elif format == 'jsonl':
                     datum = json.loads(line)
                     file_path = datum['filename']
                     # MJ's file_path starts with './'

@@ -87,12 +87,11 @@ class DBModuleLoss(SegBasedModuleLoss):
         loss_thr = self.loss_thr(thr_map, gt_thrs, gt_thr_masks)
         loss_db = self.loss_db(binary_map, gt_shrinks, gt_shrink_masks)
 
-        results = dict(
+        return dict(
             loss_prob=self.weight_prob * loss_prob,
             loss_thr=self.weight_thr * loss_thr,
-            loss_db=loss_db)
-
-        return results
+            loss_db=loss_db,
+        )
 
     def _is_poly_invalid(self, poly: np.ndarray) -> bool:
         """Check if the input polygon is invalid or not. It is invalid if its
@@ -111,10 +110,7 @@ class DBModuleLoss(SegBasedModuleLoss):
             return True
         rect_size = cv2.minAreaRect(poly)[1]
         len_shortest_side = min(rect_size)
-        if len_shortest_side < self.min_sidelength:
-            return True
-
-        return False
+        return len_shortest_side < self.min_sidelength
 
     def _generate_thr_map(self, img_size: Tuple[int, int],
                           polygons: ArrayLike) -> np.ndarray:

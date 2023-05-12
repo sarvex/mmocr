@@ -53,7 +53,7 @@ class BiFPN(BaseModule):
         self.no_norm_on_lateral = no_norm_on_lateral
         self.upsample_cfg = upsample_cfg.copy()
         self.repeat_times = repeat_times
-        if end_level == -1 or end_level == self.num_ins - 1:
+        if end_level in [-1, self.num_ins - 1]:
             self.backbone_end_level = self.num_ins
             assert num_outs >= self.num_ins - start_level
         else:
@@ -118,7 +118,7 @@ class BiFPN(BaseModule):
     def forward(self, inputs):
 
         def extra_convs(inputs, extra_convs):
-            outputs = list()
+            outputs = []
             for extra_conv in extra_convs:
                 inputs = extra_conv(inputs)
                 outputs.append(inputs)
@@ -200,10 +200,7 @@ class BiFPNLayer(BaseModule):
         # build top-down
         idx_bifpn = 0
         pathtd = inputs
-        inputs_clone = []
-        for in_tensor in inputs:
-            inputs_clone.append(in_tensor.clone())
-
+        inputs_clone = [in_tensor.clone() for in_tensor in pathtd]
         for i in range(levels - 1, 0, -1):
             _, _, h, w = pathtd[i - 1].shape
             # pathtd[i - 1] = (

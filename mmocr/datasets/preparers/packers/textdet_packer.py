@@ -66,7 +66,7 @@ class TextDetPacker(BasePacker):
         img = mmcv.imread(img_path)
         h, w = img.shape[:2]
 
-        packed_instances = list()
+        packed_instances = []
         for instance in instances:
             poly = instance.get('poly', None)
             box = instance.get('box', None)
@@ -79,13 +79,12 @@ class TextDetPacker(BasePacker):
                 ignore=instance['ignore'])
             packed_instances.append(packed_sample)
 
-        packed_instances = dict(
+        return dict(
             instances=packed_instances,
             img_path=osp.relpath(img_path, self.data_root),
             height=h,
-            width=w)
-
-        return packed_instances
+            width=w,
+        )
 
     def add_meta(self, sample: List) -> Dict:
         """Add meta information to the sample.
@@ -96,15 +95,11 @@ class TextDetPacker(BasePacker):
         Returns:
             Dict: A dict contains the meta information and samples.
         """
-        meta = {
+        return {
             'metainfo': {
                 'dataset_type': 'TextDetDataset',
                 'task_name': 'textdet',
-                'category': [{
-                    'id': 0,
-                    'name': 'text'
-                }]
+                'category': [{'id': 0, 'name': 'text'}],
             },
-            'data_list': sample
+            'data_list': sample,
         }
-        return meta

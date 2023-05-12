@@ -25,13 +25,13 @@ def collect_level_info(annotation):
     min_x, min_y, max_x, max_y = polygon.bounds
     bbox = [min_x, min_y, max_x - min_x, max_y - min_y]
     segmentation = [i for j in vertices for i in j]
-    anno = dict(
+    return dict(
         iscrowd=iscrowd,
         category_id=1,
         bbox=bbox,
         area=area,
-        segmentation=[segmentation])
-    return anno
+        segmentation=[segmentation],
+    )
 
 
 def collect_hiertext_info(root_path, level, split, print_every=1000):
@@ -87,7 +87,7 @@ def collect_hiertext_info(root_path, level, split, print_every=1000):
         img_info (dict): The dict of the img and annotation information
     """
 
-    annotation_path = osp.join(root_path, 'annotations/' + split + '.jsonl')
+    annotation_path = osp.join(root_path, f'annotations/{split}.jsonl')
     if not osp.exists(annotation_path):
         raise Exception(
             f'{annotation_path} not exists, please check and try again.')
@@ -97,11 +97,12 @@ def collect_hiertext_info(root_path, level, split, print_every=1000):
     for i, img_annos in enumerate(annotation):
         if i > 0 and i % print_every == 0:
             print(f'{i}/{len(annotation)}')
-        img_info = {}
-        img_info['file_name'] = img_annos['image_id'] + '.jpg'
-        img_info['height'] = img_annos['image_height']
-        img_info['width'] = img_annos['image_width']
-        img_info['segm_file'] = annotation_path
+        img_info = {
+            'file_name': img_annos['image_id'] + '.jpg',
+            'height': img_annos['image_height'],
+            'width': img_annos['image_width'],
+            'segm_file': annotation_path,
+        }
         anno_info = []
         for paragraph in img_annos['paragraphs']:
             if level == 'paragraph':
@@ -113,7 +114,7 @@ def collect_hiertext_info(root_path, level, split, print_every=1000):
                     anno_info.append(anno)
             elif level == 'word':
                 for line in paragraph['lines']:
-                    for word in line['words']:
+                    for _ in line['words']:
                         anno = collect_level_info(line)
                         anno_info.append(anno)
         img_info.update(anno_info=anno_info)
@@ -130,8 +131,7 @@ def parse_args():
         default='word',
         help='HierText provides three levels of annotation',
         choices=['word', 'line', 'paragraph'])
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():

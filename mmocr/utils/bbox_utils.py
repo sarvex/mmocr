@@ -28,7 +28,7 @@ def rescale_bbox(bbox: np.ndarray,
     Returns:
         np.ndarray: Rescaled bbox.
     """
-    assert mode in ['mul', 'div']
+    assert mode in {'mul', 'div'}
     bbox = np.array(bbox, dtype=np.float32)
     bbox_shape = bbox.shape
     reshape_bbox = bbox.reshape(-1, 2)
@@ -164,7 +164,7 @@ def stitch_boxes_into_lines(boxes, max_x_dist=10, min_y_overlap_ratio=0.8):
         # the rightmost box in the current line
         rightmost_box_idx = i
         line = [rightmost_box_idx]
-        for j in range(i + 1, len(x_sorted_boxes)):
+        for j in range(rightmost_box_idx + 1, len(x_sorted_boxes)):
             if j in skip_idxs:
                 continue
             if is_on_same_line(x_sorted_boxes[rightmost_box_idx]['box'],
@@ -173,11 +173,8 @@ def stitch_boxes_into_lines(boxes, max_x_dist=10, min_y_overlap_ratio=0.8):
                 skip_idxs.add(j)
                 rightmost_box_idx = j
 
-        # split line into lines if the distance between two neighboring
-        # sub-lines' is greater than max_x_dist
-        lines = []
         line_idx = 0
-        lines.append([line[0]])
+        lines = [[line[0]]]
         rightmost = np.max(x_sorted_boxes[line[0]]['box'][::2])
         for k in range(1, len(line)):
             curr_box = x_sorted_boxes[line[k]]
@@ -190,9 +187,11 @@ def stitch_boxes_into_lines(boxes, max_x_dist=10, min_y_overlap_ratio=0.8):
 
         # Get merged boxes
         for box_group in lines:
-            merged_box = {}
-            merged_box['text'] = ' '.join(
-                [x_sorted_boxes[idx]['text'] for idx in box_group])
+            merged_box = {
+                'text': ' '.join(
+                    [x_sorted_boxes[idx]['text'] for idx in box_group]
+                )
+            }
             x_min, y_min = float('inf'), float('inf')
             x_max, y_max = float('-inf'), float('-inf')
             for idx in box_group:
@@ -296,8 +295,7 @@ def sort_vertex8(points):
     """Sort vertex with 8 points [x1 y1 x2 y2 x3 y3 x4 y4]"""
     assert len(points) == 8
     vertices = _sort_vertex(np.array(points, dtype=np.float32).reshape(-1, 2))
-    sorted_box = list(vertices.flatten())
-    return sorted_box
+    return list(vertices.flatten())
 
 
 def bbox_center_distance(box1: ArrayLike, box2: ArrayLike) -> float:
@@ -327,12 +325,12 @@ def bbox_diag_distance(box: ArrayLike) -> float:
         float: The diagonal length of the bounding box.
     """
     box = np.array(box, dtype=np.float32)
-    assert (box.size == 8 or box.size == 4)
+    assert box.size in [8, 4]
 
     if box.size == 8:
-        diag = point_distance(box[0:2], box[4:6])
+        diag = point_distance(box[:2], box[4:6])
     elif box.size == 4:
-        diag = point_distance(box[0:2], box[2:4])
+        diag = point_distance(box[:2], box[2:4])
 
     return diag
 

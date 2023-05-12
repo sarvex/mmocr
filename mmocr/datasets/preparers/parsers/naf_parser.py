@@ -44,11 +44,10 @@ class NAFAnnParser(BaseParser):
 
     def parse_file(self, img_path: str, ann_path: str) -> Tuple:
         """Convert single annotation."""
-        instances = list()
-        for poly, text in self.loader(ann_path):
-            instances.append(
-                dict(poly=poly, text=text, ignore=text in self.ignore))
-
+        instances = [
+            dict(poly=poly, text=text, ignore=text in self.ignore)
+            for poly, text in self.loader(ann_path)
+        ]
         return img_path, instances
 
     def loader(self, file_path: str) -> str:
@@ -66,18 +65,13 @@ class NAFAnnParser(BaseParser):
         # 'textBBs' contains the printed texts of the table while 'fieldBBs'
         #  contains the text filled by human.
         for box_type in ['textBBs', 'fieldBBs']:
-            if not self.det:
-                # 'textBBs' is only used for detection task.
-                if box_type == 'textBBs':
-                    continue
+            if not self.det and box_type == 'textBBs':
+                continue
             for anno in data[box_type]:
                 # Skip blanks
                 if self.det:
-                    if box_type == 'fieldBBs':
-                        if anno['type'] == 'blank':
-                            continue
-                    poly = np.array(anno['poly_points']).reshape(
-                        1, 8)[0].tolist()
+                    if box_type == 'fieldBBs' and anno['type'] == 'blank':
+                        continue
                     # Since detection task only need poly, we can skip the
                     # transcription part that can be empty.
                     text = None
@@ -101,6 +95,6 @@ class NAFAnnParser(BaseParser):
                         '«', '')  # Remove strikethrough flag
                     if len(text) == 0:
                         continue
-                    poly = np.array(anno['poly_points']).reshape(
-                        1, 8)[0].tolist()
+                poly = np.array(anno['poly_points']).reshape(
+                    1, 8)[0].tolist()
                 yield poly, text

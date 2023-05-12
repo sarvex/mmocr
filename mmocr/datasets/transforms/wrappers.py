@@ -135,7 +135,7 @@ class ImgAugWrapper(BaseTransform):
             # Generate new bboxes
             bboxes = [poly2bbox(poly) for poly in transformed_polygons]
             results['gt_bboxes'] = np.zeros((0, 4), dtype=np.float32)
-            if len(bboxes) > 0:
+            if bboxes:
                 results['gt_bboxes'] = np.stack(bboxes)
 
         return True
@@ -168,13 +168,11 @@ class ImgAugWrapper(BaseTransform):
             if not poly.is_valid or poly.is_out_of_image(imgaug_polys.shape):
                 removed_poly_inds.append(i)
                 continue
-            new_poly = []
             try:
                 poly = poly.clip_out_of_image(imgaug_polys.shape)[0]
             except Exception as e:
                 warnings.warn(f'Failed to clip polygon out of image: {e}')
-            for point in poly:
-                new_poly.append(np.array(point, dtype=np.float32))
+            new_poly = [np.array(point, dtype=np.float32) for point in poly]
             new_poly = np.array(new_poly, dtype=np.float32).flatten()
             # Under some conditions, imgaug can generate "polygon" with only
             # two points, which is not a valid polygon.
@@ -209,25 +207,24 @@ class ImgAugWrapper(BaseTransform):
             arg_list = [self._to_tuple_if_list(a) for a in args[1:]]
             return getattr(iaa, args[0])(*arg_list)
         if isinstance(args, dict):
-            if 'cls' in args:
-                cls = getattr(iaa, args['cls'])
-                return cls(
-                    **{
-                        k: self._to_tuple_if_list(v)
-                        for k, v in args.items() if not k == 'cls'
-                    })
-            else:
+            if 'cls' not in args:
                 return {
                     key: self._build_augmentation(value, root=False)
                     for key, value in args.items()
                 }
-        raise RuntimeError('unknown augmenter arg: ' + str(args))
+            cls = getattr(iaa, args['cls'])
+            return cls(
+                **{
+                    k: self._to_tuple_if_list(v)
+                    for k, v in args.items()
+                    if k != 'cls'
+                }
+            )
+        raise RuntimeError(f'unknown augmenter arg: {str(args)}')
 
     def _to_tuple_if_list(self, obj: Any) -> Any:
         """Convert an object into a tuple if it is a list."""
-        if isinstance(obj, list):
-            return tuple(obj)
-        return obj
+        return tuple(obj) if isinstance(obj, list) else obj
 
     def __repr__(self):
         repr_str = self.__class__.__name__

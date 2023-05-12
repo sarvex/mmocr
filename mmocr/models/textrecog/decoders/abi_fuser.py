@@ -118,10 +118,7 @@ class ABIFuser(BaseDecoder):
                 text_logits = out_fuser['logits']
                 out_fusers.append(out_fuser)
 
-        outputs = dict(
-            out_vis=out_vis, out_langs=out_langs, out_fusers=out_fusers)
-
-        return outputs
+        return dict(out_vis=out_vis, out_langs=out_langs, out_fusers=out_fusers)
 
     def forward_test(
         self,

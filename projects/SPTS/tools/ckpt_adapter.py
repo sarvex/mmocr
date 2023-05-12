@@ -36,8 +36,7 @@ def parse_args():
         'model_path', type=str, help='Path to the source model')
     parser.add_argument(
         'out_path', type=str, help='Path to the converted model')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 if __name__ == '__main__':

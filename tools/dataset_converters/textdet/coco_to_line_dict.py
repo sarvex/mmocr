@@ -16,17 +16,16 @@ def parse_coco_json(in_path):
     for image_info in image_infos:
         imgid2imgname[image_info['id']] = image_info
         img_ids.append(image_info['id'])
-    imgid2anno = {}
-    for img_id in img_ids:
-        imgid2anno[img_id] = []
+    imgid2anno = {img_id: [] for img_id in img_ids}
     for anno in annotations:
         img_id = anno['image_id']
-        new_anno = {}
-        new_anno['iscrowd'] = anno['iscrowd']
-        new_anno['category_id'] = anno['category_id']
-        new_anno['bbox'] = anno['bbox']
-        new_anno['segmentation'] = anno['segmentation']
-        if img_id in imgid2anno.keys():
+        new_anno = {
+            'iscrowd': anno['iscrowd'],
+            'category_id': anno['category_id'],
+            'bbox': anno['bbox'],
+            'segmentation': anno['segmentation'],
+        }
+        if img_id in imgid2anno:
             imgid2anno[img_id].append(new_anno)
 
     return imgid2imgname, imgid2anno
@@ -37,11 +36,12 @@ def gen_line_dict_file(out_path, imgid2imgname, imgid2anno):
     for key, value in imgid2imgname.items():
         if key in imgid2anno:
             anno = imgid2anno[key]
-            line_dict = {}
-            line_dict['file_name'] = value['file_name']
-            line_dict['height'] = value['height']
-            line_dict['width'] = value['width']
-            line_dict['annotations'] = anno
+            line_dict = {
+                'file_name': value['file_name'],
+                'height': value['height'],
+                'width': value['width'],
+                'annotations': anno,
+            }
             lines.append(json.dumps(line_dict))
     list_to_file(out_path, lines)
 
@@ -52,8 +52,7 @@ def parse_args():
     parser.add_argument(
         '--out-path', help='output txt path with line-json format')
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():

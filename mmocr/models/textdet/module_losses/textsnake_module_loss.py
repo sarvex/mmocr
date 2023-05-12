@@ -163,14 +163,13 @@ class TextSnakeModuleLoss(SegBasedModuleLoss):
         loss_sin = self.loss_sin(pred_sin_map, gt['gt_sin_maps'], center_mask)
         loss_cos = self.loss_cos(pred_cos_map, gt['gt_cos_maps'], center_mask)
 
-        results = dict(
+        return dict(
             loss_text=loss_text,
             loss_center=loss_center,
             loss_radius=loss_radius,
             loss_sin=loss_sin,
-            loss_cos=loss_cos)
-
-        return results
+            loss_cos=loss_cos,
+        )
 
     def get_targets(self, data_samples: List[TextDetDataSample]) -> Tuple:
         """Generate loss targets from data samples.
@@ -269,11 +268,11 @@ class TextSnakeModuleLoss(SegBasedModuleLoss):
             polygon_points = np.array(poly).reshape(-1, 2)
 
             n = len(polygon_points)
-            keep_inds = []
-            for i in range(n):
-                if norm(polygon_points[i] -
-                        polygon_points[(i + 1) % n]) > 1e-5:
-                    keep_inds.append(i)
+            keep_inds = [
+                i
+                for i in range(n)
+                if norm(polygon_points[i] - polygon_points[(i + 1) % n]) > 1e-5
+            ]
             polygon_points = polygon_points[keep_inds]
 
             _, _, top_line, bot_line = self._reorder_poly_edge(polygon_points)
@@ -287,11 +286,10 @@ class TextSnakeModuleLoss(SegBasedModuleLoss):
                     center_line = center_line[::-1]
                     resampled_top_line = resampled_top_line[::-1]
                     resampled_bot_line = resampled_bot_line[::-1]
-            else:
-                if (center_line[-1] - center_line[0])[0] < 0:
-                    center_line = center_line[::-1]
-                    resampled_top_line = resampled_top_line[::-1]
-                    resampled_bot_line = resampled_bot_line[::-1]
+            elif (center_line[-1] - center_line[0])[0] < 0:
+                center_line = center_line[::-1]
+                resampled_top_line = resampled_top_line[::-1]
+                resampled_bot_line = resampled_bot_line[::-1]
 
             line_head_shrink_len = norm(resampled_top_line[0] -
                                         resampled_bot_line[0]) / 4.0
@@ -497,9 +495,7 @@ class TextSnakeModuleLoss(SegBasedModuleLoss):
             p_coords = np.dot(weight, line[[edge_ind, edge_ind + 1]])
             points.append(p_coords)
         points.append(line[-1])
-        resampled_line = np.vstack(points)
-
-        return resampled_line
+        return np.vstack(points)
 
     def _resample_sidelines(self, sideline1: ndarray, sideline2: ndarray,
                             resample_step: float) -> Tuple[ndarray, ndarray]:

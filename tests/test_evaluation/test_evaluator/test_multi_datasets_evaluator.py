@@ -55,12 +55,10 @@ class ToyMetric(BaseMetric):
         label = np.array([result['label'] for result in results])
         acc = (pred == label).sum() / pred.size
 
-        metrics = {
+        return {
             'accuracy': acc,
             'size': pred.size,  # To check the number of testing samples
         }
-
-        return metrics
 
 
 def generate_test_results(size, batch_size, pred, label):

@@ -92,12 +92,13 @@ class PSEPostprocessor(PANPostprocessor):
             points = np.array(np.where(labels == i)).transpose((1, 0))[:, ::-1]
             area = points.shape[0]
             score_instance = np.mean(score[labels == i])
-            if not (area >= self.min_text_area
-                    or score_instance > self.score_threshold):
+            if (
+                area < self.min_text_area
+                and score_instance <= self.score_threshold
+            ):
                 continue
 
-            polygon = self._points2boundary(points)
-            if polygon:
+            if polygon := self._points2boundary(points):
                 polygons.append(polygon)
                 scores.append(score_instance)
 

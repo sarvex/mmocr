@@ -134,7 +134,7 @@ class NaiveDataObtainer:
             name = set(os.listdir(dst_path))
             if '.finish' in name:
                 extracted = True
-            elif '.finish' not in name and len(name) > 0:
+            elif len(name) > 0:
                 while True:
                     c = input(f'{dst_path} already exists when extracting '
                               '{zip_name}, unzip again? (y/N) ') or 'N'
@@ -156,10 +156,7 @@ class NaiveDataObtainer:
             with zipfile.ZipFile(src_path, 'r') as zip_ref:
                 zip_ref.extractall(dst_path)
         elif src_path.endswith('.tar.gz') or src_path.endswith('.tar'):
-            if src_path.endswith('.tar.gz'):
-                mode = 'r:gz'
-            elif src_path.endswith('.tar'):
-                mode = 'r:'
+            mode = 'r:gz' if src_path.endswith('.tar.gz') else 'r:'
             try:
                 import tarfile
             except ImportError:

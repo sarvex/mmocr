@@ -32,7 +32,7 @@ class MJSynthAnnParser(ICDARTxtTextRecogAnnParser):
     def parse_files(self, img_dir: str, ann_path: str) -> List:
         """Parse annotations."""
         assert isinstance(ann_path, str)
-        samples = list()
+        samples = []
         for anno in self.loader(
                 file_path=ann_path,
                 format=self.format,

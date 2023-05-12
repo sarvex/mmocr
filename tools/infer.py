@@ -83,10 +83,7 @@ def parse_args():
         'det', 'det_weights', 'rec', 'rec_weights', 'kie', 'kie_weights',
         'device'
     ]
-    init_args = {}
-    for init_kw in init_kws:
-        init_args[init_kw] = call_args.pop(init_kw)
-
+    init_args = {init_kw: call_args.pop(init_kw) for init_kw in init_kws}
     return init_args, call_args
 
 

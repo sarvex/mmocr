@@ -77,21 +77,22 @@ def dump_ocr_data(image_infos: Sequence[Dict], out_json_name: str,
 
     assert isinstance(image_infos, list)
     assert isinstance(out_json_name, str)
-    assert task_name in task2dataset.keys()
+    assert task_name in task2dataset
 
     dataset_type = task2dataset[task_name]
 
     out_json = dict(
         metainfo=dict(dataset_type=dataset_type, task_name=task_name),
-        data_list=list())
-    if task_name in ['textdet', 'textspotter']:
+        data_list=[],
+    )
+    if task_name in {'textdet', 'textspotter'}:
         out_json['metainfo']['category'] = [dict(id=0, name='text')]
 
     for image_info in image_infos:
 
-        single_info = dict(instances=list())
+        single_info = dict(instances=[])
         single_info['img_path'] = image_info['file_name']
-        if task_name in ['textdet', 'textspotter']:
+        if task_name in {'textdet', 'textspotter'}:
             single_info['height'] = image_info['height']
             single_info['width'] = image_info['width']
             if 'segm_file' in image_info:
@@ -101,9 +102,9 @@ def dump_ocr_data(image_infos: Sequence[Dict], out_json_name: str,
 
         for anno_info in anno_infos:
             instance = {}
-            if task_name in ['textrecog', 'textspotter']:
+            if task_name in {'textrecog', 'textspotter'}:
                 instance['text'] = anno_info['text']
-            if task_name in ['textdet', 'textspotter']:
+            if task_name in {'textdet', 'textspotter'}:
                 mask = anno_info['segmentation']
                 # TODO: remove this if-branch when all converters have been
                 # verified
@@ -180,10 +181,7 @@ def recog_anno_to_imginfo(
     assert is_type_list(labels, str)
     assert len(file_paths) == len(labels)
 
-    results = []
-    for i in range(len(file_paths)):
-        result = dict(
-            file_name=file_paths[i], anno_info=[dict(text=labels[i])])
-        results.append(result)
-
-    return results
+    return [
+        dict(file_name=file_paths[i], anno_info=[dict(text=labels[i])])
+        for i in range(len(file_paths))
+    ]

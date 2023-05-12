@@ -51,17 +51,17 @@ class BaseTextRecogModuleLoss(nn.Module):
                 'The type of dictionary should be `Dictionary` or dict, '
                 f'but got {type(dictionary)}')
         self.max_seq_len = max_seq_len
-        assert letter_case in ['unchanged', 'upper', 'lower']
+        assert letter_case in {'unchanged', 'upper', 'lower'}
         self.letter_case = letter_case
 
-        assert pad_with in ['auto', 'padding', 'end', 'none']
+        assert pad_with in {'auto', 'padding', 'end', 'none'}
         if pad_with == 'auto':
             self.pad_idx = self.dictionary.padding_idx or \
-                self.dictionary.end_idx
-        elif pad_with == 'padding':
-            self.pad_idx = self.dictionary.padding_idx
+                    self.dictionary.end_idx
         elif pad_with == 'end':
             self.pad_idx = self.dictionary.end_idx
+        elif pad_with == 'padding':
+            self.pad_idx = self.dictionary.padding_idx
         else:
             self.pad_idx = None
         if self.pad_idx is None and pad_with != 'none':

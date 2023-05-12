@@ -72,5 +72,4 @@ class TextSnakeHead(BaseTextDetHead):
             channels represent [0]: text score, [1]: center score,
             [2]: sin, [3] cos, [4] radius, respectively.
         """
-        outputs = self.out_conv(inputs)
-        return outputs
+        return self.out_conv(inputs)

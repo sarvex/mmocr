@@ -181,13 +181,15 @@ class MMOCRInferencer(BaseMMOCRInferencer):
                             inputs, result['det'], result['rec']):
                         det_pred = det_data_sample.pred_instances
                         kie_input = dict(img=img)
-                        kie_input['instances'] = []
-                        for polygon, rec_data_sample in zip(
-                                det_pred['polygons'], rec_data_samples):
-                            kie_input['instances'].append(
-                                dict(
-                                    bbox=poly2bbox(polygon),
-                                    text=rec_data_sample.pred_text.item))
+                        kie_input['instances'] = [
+                            dict(
+                                bbox=poly2bbox(polygon),
+                                text=rec_data_sample.pred_text.item,
+                            )
+                            for polygon, rec_data_sample in zip(
+                                det_pred['polygons'], rec_data_samples
+                            )
+                        ]
                         self.kie_inputs.append(kie_input)
                     result['kie'] = self.kie_inferencer(
                         self.kie_inputs,
@@ -362,7 +364,6 @@ class MMOCRInferencer(BaseMMOCRInferencer):
                 "predictions" and "visualization".
         """
 
-        result_dict = {}
         pred_results = [{} for _ in range(len(next(iter(preds.values()))))]
         if 'rec' in self.mode:
             for i, rec_pred in enumerate(preds['rec']):
@@ -400,7 +401,7 @@ class MMOCRInferencer(BaseMMOCRInferencer):
                 pred_out_file = osp.join(pred_out_dir, pred_name)
                 mmengine.dump(pred_result, pred_out_file)
 
-        result_dict['predictions'] = pred_results
+        result_dict = {'predictions': pred_results}
         if print_result:
             print(result_dict)
         result_dict['visualization'] = visualization
@@ -414,9 +415,10 @@ class MMOCRInferencer(BaseMMOCRInferencer):
 
         for det_data_sample, rec_data_samples in zip(preds['det'],
                                                      preds['rec']):
-            texts = []
-            for rec_data_sample in rec_data_samples:
-                texts.append(rec_data_sample.pred_text.item)
+            texts = [
+                rec_data_sample.pred_text.item
+                for rec_data_sample in rec_data_samples
+            ]
             det_data_sample.pred_instances.texts = texts
             results.append(det_data_sample)
         return results

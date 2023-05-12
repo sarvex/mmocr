@@ -195,10 +195,7 @@ class CharMetric(BaseMetric):
         eps = 1e-8
         char_recall = 1.0 * true_positive_char_num / (eps + gt_char_num)
         char_precision = 1.0 * true_positive_char_num / (eps + pred_char_num)
-        eval_res = {}
-        eval_res['char_recall'] = char_recall
-        eval_res['char_precision'] = char_precision
-
+        eval_res = {'char_recall': char_recall, 'char_precision': char_precision}
         for key, value in eval_res.items():
             eval_res[key] = float(f'{value:.4f}')
         return eval_res
@@ -215,13 +212,11 @@ class CharMetric(BaseMetric):
         """
 
         all_opt = SequenceMatcher(None, pred, gt)
-        true_positive_char_num = 0
-        for opt, _, _, s2, e2 in all_opt.get_opcodes():
-            if opt == 'equal':
-                true_positive_char_num += (e2 - s2)
-            else:
-                pass
-        return true_positive_char_num
+        return sum(
+            (e2 - s2)
+            for opt, _, _, s2, e2 in all_opt.get_opcodes()
+            if opt == 'equal'
+        )
 
 
 @METRICS.register_module()
@@ -285,8 +280,7 @@ class OneMinusNEDMetric(BaseMetric):
         norm_ed = [result['norm_ed'] for result in results]
         norm_ed_sum = sum(norm_ed)
         normalized_edit_distance = norm_ed_sum / max(1, gt_word_num)
-        eval_res = {}
-        eval_res['1-N.E.D'] = 1.0 - normalized_edit_distance
+        eval_res = {'1-N.E.D': 1.0 - normalized_edit_distance}
         for key, value in eval_res.items():
             eval_res[key] = float(f'{value:.4f}')
         return eval_res

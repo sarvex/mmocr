@@ -84,8 +84,7 @@ class BaseTextDetHead(BaseModule):
             dict: A dictionary of loss components.
         """
         outs = self(x, data_samples)
-        losses = self.module_loss(outs, data_samples)
-        return losses
+        return self.module_loss(outs, data_samples)
 
     def loss_and_predict(self, x: Tuple[Tensor], data_samples: DetSampleList
                          ) -> Tuple[dict, DetSampleList]:
@@ -129,5 +128,4 @@ class BaseTextDetHead(BaseModule):
         """
         outs = self(x, data_samples)
 
-        predictions = self.postprocessor(outs, data_samples)
-        return predictions
+        return self.postprocessor(outs, data_samples)

@@ -33,13 +33,14 @@ class TestCLIPBottleneck(TestCase):
         conv_cfg = None
         norm_cfg = {'type': 'BN', 'requires_grad': True}
 
-        downsample = []
-        downsample.append(
+        downsample = [
             nn.AvgPool2d(
                 kernel_size=stride,
                 stride=stride,
                 ceil_mode=True,
-                count_include_pad=False))
+                count_include_pad=False,
+            )
+        ]
         downsample.extend([
             build_conv_layer(
                 conv_cfg,

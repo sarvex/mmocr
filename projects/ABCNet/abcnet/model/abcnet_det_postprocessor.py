@@ -88,8 +88,10 @@ class ABCNetDetPostprocessor(BaseTextDetPostProcessor):
             device=pred_results[0][0].device)
         for img_id in range(bs):
             single_results = [mlvl_priors]
-            for pred_result in pred_results:
-                single_results.append(select_single_mlvl(pred_result, img_id))
+            single_results.extend(
+                select_single_mlvl(pred_result, img_id)
+                for pred_result in pred_results
+            )
             results.append(single_results)
         return results
 
@@ -223,6 +225,4 @@ class ABCNetDetPostprocessor(BaseTextDetPostProcessor):
             cfg = {}
         pred_results = self.split_results(pred_results)
         process_single = partial(self._process_single, **cfg)
-        results = list(map(process_single, pred_results, data_samples))
-
-        return results
+        return list(map(process_single, pred_results, data_samples))

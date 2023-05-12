@@ -96,7 +96,6 @@ class ResNet(BaseModule):
         Returns:
             Sequential: A sequence of blocks.
         """
-        layers = []
         downsample = None
         block_cfgs_ = block_cfgs.copy()
         if isinstance(stride, int):
@@ -111,23 +110,24 @@ class ResNet(BaseModule):
                 norm_cfg=dict(type='BN'),
                 act_cfg=None)
 
-        if block_cfgs_['type'] == 'BasicBlock':
-            block = BasicBlock
-            block_cfgs_.pop('type')
-        else:
-            raise ValueError('{} not implement yet'.format(block['type']))
+        if block_cfgs_['type'] != 'BasicBlock':
+            raise ValueError(f"{block['type']} not implement yet")
 
-        layers.append(
+        block = BasicBlock
+        block_cfgs_.pop('type')
+        layers = [
             block(
                 inplanes,
                 planes,
                 stride=stride,
                 downsample=downsample,
-                **block_cfgs_))
+                **block_cfgs_
+            )
+        ]
         inplanes = planes
-        for _ in range(1, blocks):
-            layers.append(block(inplanes, planes, **block_cfgs_))
-
+        layers.extend(
+            block(inplanes, inplanes, **block_cfgs_) for _ in range(1, blocks)
+        )
         return Sequential(*layers)
 
     def _make_stem_layer(self, in_channels: int,
@@ -142,7 +142,7 @@ class ResNet(BaseModule):
         if isinstance(stem_channels, int):
             stem_channels = [stem_channels]
         stem_layers = []
-        for _, channels in enumerate(stem_channels):
+        for channels in stem_channels:
             stem_layer = ConvModule(
                 in_channels,
                 channels,
@@ -252,13 +252,10 @@ class ResNet(BaseModule):
             res_layer = getattr(self, layer_name)
             if not self.use_plugins:
                 x = res_layer(x)
-                if self.out_indices and i in self.out_indices:
-                    outs.append(x)
             else:
                 x = self.forward_plugin(x, self.plugin_ahead_names[i])
                 x = res_layer(x)
                 x = self.forward_plugin(x, self.plugin_after_names[i])
-                if self.out_indices and i in self.out_indices:
-                    outs.append(x)
-
+            if self.out_indices and i in self.out_indices:
+                outs.append(x)
         return tuple(outs) if self.out_indices else x

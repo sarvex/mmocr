@@ -87,7 +87,7 @@ class EncoderDecoderRecognizerTTAModel(BaseTTAModel):
         Returns:
             RecSampleList: Merged prediction.
         """
-        predictions = list()
+        predictions = []
         for data_samples in data_samples_list:
             scores = [
                 data_sample.pred_text.score for data_sample in data_samples

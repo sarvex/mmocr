@@ -91,8 +91,7 @@ class SPTSDictionary(Dictionary):
             'start_idx', 'end_idx', 'unknown_idx', 'seq_end_idx', 'padding_idx'
         ]
         for term in idx_terms:
-            value = getattr(self, term)
-            if value:
+            if value := getattr(self, term):
                 setattr(self, term, value + self.num_bins)
         for char in self._dict:
             self._char2idx[char] += self.num_bins
@@ -135,10 +134,7 @@ class SPTSDictionary(Dictionary):
             self._dict.append(self.padding_token)
             self.padding_idx = len(self._dict) - 1
 
-        # update char2idx
-        self._char2idx = {}
-        for idx, char in enumerate(self._dict):
-            self._char2idx[char] = idx
+        self._char2idx = {char: idx for idx, char in enumerate(self._dict)}
 
     def idx2str(self, index: Sequence[int]) -> str:
         """Convert a list of index to string.

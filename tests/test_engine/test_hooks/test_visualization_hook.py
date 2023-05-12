@@ -21,8 +21,7 @@ def _rand_bboxes(num_boxes, h, w):
     br_x = ((cx * w) + (w * bw / 2)).clamp(0, w).unsqueeze(0)
     br_y = ((cy * h) + (h * bh / 2)).clamp(0, h).unsqueeze(0)
 
-    bboxes = torch.cat([tl_x, tl_y, br_x, br_y], dim=0).T
-    return bboxes
+    return torch.cat([tl_x, tl_y, br_x, br_y], dim=0).T
 
 
 class TestVisualizationHook(TestCase):

@@ -56,13 +56,11 @@ def collect_annotations(files, nproc=1):
     assert isinstance(files, list)
     assert isinstance(nproc, int)
 
-    if nproc > 1:
-        images = mmengine.track_parallel_progress(
-            load_img_info, files, nproc=nproc)
-    else:
-        images = mmengine.track_progress(load_img_info, files)
-
-    return images
+    return (
+        mmengine.track_parallel_progress(load_img_info, files, nproc=nproc)
+        if nproc > 1
+        else mmengine.track_progress(load_img_info, files)
+    )
 
 
 def load_img_info(files):
@@ -110,17 +108,16 @@ def load_txt_info(gt_file, img_info):
 
     with open(gt_file, encoding='unicode_escape') as f:
         anno_info = []
-        for ann in f.readlines():
-
+        for ann in f:
             # annotation format [x1, y1, x2, y2, x3, y3, x4, y4, transcript]
             try:
-                ann_box = np.array(ann.split(',')[0:8]).astype(int).tolist()
+                ann_box = np.array(ann.split(',')[:8]).astype(int).tolist()
             except ValueError:
                 # skip invalid annotation line
                 continue
-            x = max(0, min(ann_box[0::2]))
+            x = max(0, min(ann_box[::2]))
             y = max(0, min(ann_box[1::2]))
-            w, h = max(ann_box[0::2]) - x, max(ann_box[1::2]) - y
+            w, h = max(ann_box[::2]) - x, max(ann_box[1::2]) - y
             bbox = [x, y, w, h]
             segmentation = ann_box
 
@@ -143,8 +140,7 @@ def parse_args():
     parser.add_argument('root_path', help='Root dir path of SROIE')
     parser.add_argument(
         '--nproc', default=1, type=int, help='Number of process')
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def main():
@@ -154,14 +150,16 @@ def main():
     for split in ['training', 'test']:
         print(f'Processing {split} set...')
         with mmengine.Timer(
-                print_tmpl='It takes {}s to convert SROIE annotation'):
+                        print_tmpl='It takes {}s to convert SROIE annotation'):
             files = collect_files(
                 osp.join(root_path, 'imgs', split),
                 osp.join(root_path, 'annotations', split))
             image_infos = collect_annotations(files, nproc=args.nproc)
-            dump_ocr_data(image_infos,
-                          osp.join(root_path, 'instances_' + split + '.json'),
-                          'textdet')
+            dump_ocr_data(
+                image_infos,
+                osp.join(root_path, f'instances_{split}.json'),
+                'textdet',
+            )
 
 
 if __name__ == '__main__':

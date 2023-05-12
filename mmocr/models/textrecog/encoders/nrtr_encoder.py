@@ -95,9 +95,7 @@ class NRTREncoder(BaseEncoder):
 
         feat = feat.view(n, c, h * w).permute(0, 2, 1).contiguous()
 
-        valid_ratios = []
-        for data_sample in data_samples:
-            valid_ratios.append(data_sample.get('valid_ratio'))
+        valid_ratios = [data_sample.get('valid_ratio') for data_sample in data_samples]
         mask = self._get_source_mask(feat, valid_ratios)
 
         output = feat

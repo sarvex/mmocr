@@ -23,8 +23,10 @@ class TestParser(TestCase):
 
         # warnings
         line = 'test test test'
-        msg = 'More than two blank spaces were detected. '
-        msg += 'Please use LineJsonParser to handle '
+        msg = (
+            'More than two blank spaces were detected. '
+            + 'Please use LineJsonParser to handle '
+        )
         msg += 'annotations with blanks. '
         msg += 'Check Doc '
         msg += 'https://mmocr.readthedocs.io/en/latest/'

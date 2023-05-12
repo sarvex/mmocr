@@ -26,23 +26,25 @@ class COCOTextDetAnnParser(BaseParser):
                  variant: str = 'standard') -> None:
 
         super().__init__(nproc=nproc, split=split)
-        assert variant in ['standard', 'cocotext', 'textocr'], \
-            f'variant {variant} is not supported'
+        assert variant in {
+            'standard',
+            'cocotext',
+            'textocr',
+        }, f'variant {variant} is not supported'
         self.variant = variant
 
     def parse_files(self, img_dir: str, ann_path: str) -> List:
         """Parse single annotation."""
-        samples = list()
+        samples = []
         coco = COCO(ann_path)
-        if self.variant == 'cocotext' or self.variant == 'textocr':
+        if self.variant in ['cocotext', 'textocr']:
             # cocotext stores both 'train' and 'val' split in one annotation
             # file, and uses the 'set' field to distinguish them.
             if self.variant == 'cocotext':
                 for img in coco.dataset['imgs']:
                     if self.split == coco.dataset['imgs'][img]['set']:
                         coco.imgs[img] = coco.dataset['imgs'][img]
-            # textocr stores 'train' and 'val'split separately
-            elif self.variant == 'textocr':
+            else:
                 coco.imgs = coco.dataset['imgs']
             # both cocotext and textocr stores the annotation ID in the
             # 'imgToAnns' field, so we need to convert it to the 'anns' field
@@ -66,7 +68,7 @@ class COCOTextDetAnnParser(BaseParser):
             ann_ids = [str(ann_id) for ann_id in ann_ids]
             ann_info = coco.load_anns(ann_ids)
             total_ann_ids.extend(ann_ids)
-            instances = list()
+            instances = []
             for ann in ann_info:
                 if self.variant == 'standard':
                     # standard coco format use 'segmentation' field to store

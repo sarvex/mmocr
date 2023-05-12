@@ -186,7 +186,7 @@ class DRRGPostprocessor(BaseTextDetPostProcessor):
             List[list[Node]]: The clustered Node objects.
         """
         assert isinstance(nodes, list)
-        assert all([isinstance(node, Node) for node in nodes])
+        assert all(isinstance(node, Node) for node in nodes)
         assert isinstance(score_dict, dict)
 
         clusters = []
@@ -223,10 +223,8 @@ class DRRGPostprocessor(BaseTextDetPostProcessor):
             ndarray: The node label array.
         """
         assert isinstance(clusters, list)
-        assert all([isinstance(cluster, list) for cluster in clusters])
-        assert all([
-            isinstance(node, Node) for cluster in clusters for node in cluster
-        ])
+        assert all(isinstance(cluster, list) for cluster in clusters)
+        assert all(isinstance(node, Node) for cluster in clusters for node in cluster)
         assert isinstance(num_nodes, int)
 
         node_labels = np.zeros(num_nodes)
@@ -348,9 +346,8 @@ class DRRGPostprocessor(BaseTextDetPostProcessor):
             List[list[int]]: The shortest index path.
         """
         assert isinstance(points, list)
-        assert all([isinstance(point, list) for point in points])
-        assert all(
-            [isinstance(coord, int) for point in points for coord in point])
+        assert all(isinstance(point, list) for point in points)
+        assert all(isinstance(coord, int) for point in points for coord in point)
 
         points_queue = points.copy()
         shortest_path = []
